@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="navigate_to_previous_screen">Wróć do poprzedniego ekranu</string>
+
+    <string name="no_value">Brak</string>
+
+    <string name="navigate_to_settings_description">Przejdź do ustawień</string>
+
+    <string name="settings">Ustawienia</string>
+    <string name="language">Język</string>
+    <string name="system">System</string>
+
+    <string name="service_running_action_channel_name">Status biegu</string>
+    <string name="service_running_action_channel_description">Status biegu</string>
+    <string name="service_running_action_stop">Stop</string>
+</resources>

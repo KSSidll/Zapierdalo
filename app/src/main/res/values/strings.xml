@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name" translatable="false">Zapierdalo</string>
+
+    <string name="navigate_to_previous_screen">Return to previous screen</string>
+
+    <string name="no_value">None</string>
+
+    <string name="navigate_to_settings_description">Navigate to settings</string>
+
+    <string name="settings">Settings</string>
+    <string name="language">Language</string>
+    <string name="system">System</string>
+
+    <string name="service_running_action_channel_name">Run Status</string>
+    <string name="service_running_action_channel_description">Run status</string>
+    <string name="service_running_action_stop">Stop</string>
+</resources>
