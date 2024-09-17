@@ -5,6 +5,7 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Ignore
 import androidx.room.PrimaryKey
+import kotlinx.serialization.Serializable
 import java.util.Calendar
 
 @Entity(
@@ -18,6 +19,7 @@ import java.util.Calendar
         )
     ]
 )
+@Serializable
 data class GpsEntity(
     @PrimaryKey(autoGenerate = true) val id: Long,
     @ColumnInfo(index = true) val runActionId: Long,

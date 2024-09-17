@@ -5,10 +5,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
-import androidx.compose.material3.windowsizeclass.WindowSizeClass
-import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
-import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.kssidll.zapierdalo.service.RunningActionService
@@ -20,15 +16,9 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.runBlocking
 import org.osmdroid.config.Configuration
 
-@Immutable
-data class AppState(
-    val windowSizeClass: WindowSizeClass
-)
-
 @AndroidEntryPoint
 class MainActivity: AppCompatActivity() {
 
-    @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
 
@@ -49,14 +39,7 @@ class MainActivity: AppCompatActivity() {
 
         setContent {
             ZapierdaloTheme {
-                val state = AppState(
-                    windowSizeClass = calculateWindowSizeClass(activity = this)
-                )
-
-                Navigation(
-                    appState = state,
-                    modifier = Modifier.fillMaxSize()
-                )
+                Navigation(modifier = Modifier.fillMaxSize())
             }
         }
     }

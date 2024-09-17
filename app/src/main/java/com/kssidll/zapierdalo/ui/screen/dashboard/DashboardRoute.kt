@@ -7,13 +7,11 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
-import com.kssidll.zapierdalo.AppState
 import com.kssidll.zapierdalo.service.RunningActionService
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun DashboardRoute(
-    appState: AppState,
     navigateSettings: () -> Unit,
     viewModel: DashboardViewModel = hiltViewModel()
 ) {
@@ -36,6 +34,10 @@ fun DashboardRoute(
 
                 is DashboardEvent.StartRunningAction -> {
                     requestLocationPermissionLauncher.launchMultiplePermissionRequest()
+                }
+
+                is DashboardEvent.ChangeScreenDestination -> {
+                    viewModel.handleEvent(event)
                 }
             }
         },

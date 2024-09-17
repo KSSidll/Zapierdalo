@@ -13,4 +13,6 @@
     <string name="service_running_action_channel_name">Status biegu</string>
     <string name="service_running_action_channel_description">Status biegu</string>
     <string name="service_running_action_stop">Stop</string>
+    <string name="dashboard">Pulpit</string>
+    <string name="runs">Biegi</string>
 </resources>

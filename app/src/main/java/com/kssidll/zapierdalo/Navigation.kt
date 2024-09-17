@@ -78,7 +78,6 @@ fun defaultNavigatePopExitTransition(): ExitTransition {
 
 @Composable
 fun Navigation(
-    appState: AppState,
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController()
 ) {
@@ -105,7 +104,6 @@ fun Navigation(
     ) {
         composable<NavigationDestinations.Dashboard> {
             DashboardRoute(
-                appState = appState,
                 navigateSettings = {
                     navController.navigate(NavigationDestinations.Settings)
                 }
@@ -114,7 +112,6 @@ fun Navigation(
 
         composable<NavigationDestinations.Settings> {
             SettingsRoute(
-                appState = appState,
                 navigateBack = navigateBack,
             )
         }

@@ -40,51 +40,51 @@ val DarkColorScheme = darkColorScheme(
     ),
 
     secondary = Color.hsl(
-        hue = 259f,
-        saturation = 1f,
+        hue = 270f,
+        saturation = 0.6f,
         lightness = 0.8f,
         colorSpace = colorSpace
     ),
     onSecondary = Color.hsl(
-        hue = 259f,
-        saturation = 1f,
+        hue = 270f,
+        saturation = 0.6f,
         lightness = 0.2f,
         colorSpace = colorSpace
     ),
     secondaryContainer = Color.hsl(
-        hue = 259f,
-        saturation = 1f,
+        hue = 270f,
+        saturation = 0.6f,
         lightness = 0.3f,
         colorSpace = colorSpace
     ),
     onSecondaryContainer = Color.hsl(
-        hue = 259f,
-        saturation = 1f,
+        hue = 270f,
+        saturation = 0.6f,
         lightness = 0.9f,
         colorSpace = colorSpace
     ),
 
     tertiary = Color.hsl(
-        hue = 270f,
-        saturation = 0.6f,
+        hue = 259f,
+        saturation = 1f,
         lightness = 0.8f,
         colorSpace = colorSpace
     ),
     onTertiary = Color.hsl(
-        hue = 270f,
-        saturation = 0.6f,
+        hue = 259f,
+        saturation = 1f,
         lightness = 0.2f,
         colorSpace = colorSpace
     ),
     tertiaryContainer = Color.hsl(
-        hue = 270f,
-        saturation = 0.6f,
+        hue = 259f,
+        saturation = 1f,
         lightness = 0.3f,
         colorSpace = colorSpace
     ),
     onTertiaryContainer = Color.hsl(
-        hue = 270f,
-        saturation = 0.6f,
+        hue = 259f,
+        saturation = 1f,
         lightness = 0.9f,
         colorSpace = colorSpace
     ),

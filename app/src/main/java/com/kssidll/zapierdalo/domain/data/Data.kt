@@ -2,10 +2,12 @@ package com.kssidll.zapierdalo.domain.data
 
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
+import kotlinx.serialization.Serializable
 
 /**
  * A generic abstraction for repository data with loaded and loading states
  */
+@Serializable
 sealed class Data<T> {
     /**
      * Signifies loaded state with some contained data value

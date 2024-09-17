@@ -3,11 +3,9 @@ package com.kssidll.zapierdalo.ui.screen.settings
 
 import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.kssidll.zapierdalo.AppState
 
 @Composable
 fun SettingsRoute(
-    appState: AppState,
     navigateBack: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {

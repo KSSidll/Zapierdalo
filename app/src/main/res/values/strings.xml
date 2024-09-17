@@ -14,4 +14,7 @@
     <string name="service_running_action_channel_name">Run Status</string>
     <string name="service_running_action_channel_description">Run status</string>
     <string name="service_running_action_stop">Stop</string>
+
+    <string name="dashboard">Dashboard</string>
+    <string name="runs">Runs</string>
 </resources>

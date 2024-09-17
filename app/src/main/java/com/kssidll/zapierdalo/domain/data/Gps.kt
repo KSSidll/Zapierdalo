@@ -1,8 +1,10 @@
 package com.kssidll.zapierdalo.domain.data
 
 import com.kssidll.zapierdalo.data.data.GpsEntity
+import kotlinx.serialization.Serializable
 import org.osmdroid.util.GeoPoint
 
+@Serializable
 data class Gps(
     val entity: GpsEntity,
     val runAction: RunAction,
