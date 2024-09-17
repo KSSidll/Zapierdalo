@@ -15,4 +15,13 @@
     <string name="service_running_action_stop">Stop</string>
     <string name="dashboard">Pulpit</string>
     <string name="runs">Biegi</string>
+    <string name="today">Dziś</string>
+    <string name="yesterday">Wczoraj</string>
+    <string name="run_date_format">d MMM, yyyy</string>
+
+    <string name="dark">Ciemny</string>
+    <string name="light">Jasny</string>
+
+    <string name="stop">Zatrzymaj</string>
+    <string name="start">Rozpocznij</string>
 </resources>

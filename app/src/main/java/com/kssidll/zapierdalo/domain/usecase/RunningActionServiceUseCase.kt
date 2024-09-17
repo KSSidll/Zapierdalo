@@ -12,3 +12,11 @@ class StartRunningActionServiceUseCase @Inject constructor(
         RunningActionService.start(context)
     }
 }
+
+class StopRunningActionServiceUseCase @Inject constructor(
+    @ApplicationContext private val context: Context
+) {
+    operator fun invoke() {
+        RunningActionService.stop(context)
+    }
+}

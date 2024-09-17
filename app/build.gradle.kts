@@ -116,6 +116,7 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.paging)
 
     // Helpers
     implementation(libs.google.accompanist)
@@ -133,6 +134,10 @@ dependencies {
 
     // Lint
     lintChecks(libs.slack.compose.lint)
+
+    // Charts
+    implementation(libs.dev.vico.compose)
+    implementation(libs.dev.vico.compose.material3)
 }
 
 ksp {

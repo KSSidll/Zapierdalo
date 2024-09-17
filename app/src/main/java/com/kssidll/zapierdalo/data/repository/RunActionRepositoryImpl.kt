@@ -1,5 +1,6 @@
 package com.kssidll.zapierdalo.data.repository
 
+import androidx.paging.PagingSource
 import com.kssidll.zapierdalo.data.dao.RunActionDao
 import com.kssidll.zapierdalo.data.data.RunActionEntity
 import com.kssidll.zapierdalo.domain.repository.RunActionRepository
@@ -29,6 +30,10 @@ class RunActionRepositoryImpl(private val dao: RunActionDao): RunActionRepositor
 
     override fun all(): Flow<List<RunActionEntity>> {
         return dao.all()
+    }
+
+    override fun allPaged(): PagingSource<Int, RunActionEntity> {
+        return dao.allPaged()
     }
 
     override fun latest(): Flow<RunActionEntity?> {

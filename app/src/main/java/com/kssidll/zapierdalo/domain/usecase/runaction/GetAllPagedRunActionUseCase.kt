@@ -1,9 +1,12 @@
 package com.kssidll.zapierdalo.domain.usecase.runaction
 
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.map
 import com.kssidll.zapierdalo.data.data.RunActionEntity
 import com.kssidll.zapierdalo.data.data.totalDistance
 import com.kssidll.zapierdalo.data.data.totalSteps
-import com.kssidll.zapierdalo.domain.data.Data
 import com.kssidll.zapierdalo.domain.data.RunAction
 import com.kssidll.zapierdalo.domain.data.toDomain
 import com.kssidll.zapierdalo.domain.repository.RunActionRepository
@@ -18,31 +21,35 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
-class GetRunActionEntityUseCase @Inject constructor(
-    private val runActionRepository: RunActionRepository,
+class GetAllPagedRunActionEntityUseCase @Inject constructor(
+    private val runActionRepository: RunActionRepository
 ) {
     operator fun invoke(
-        id: Long,
         dispatcher: CoroutineDispatcher = Dispatchers.IO
-    ): Flow<RunActionEntity?> {
-        return runActionRepository.get(id)
-            .distinctUntilChanged()
+    ): Flow<PagingData<RunActionEntity>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = 8,
+                enablePlaceholders = true
+            ),
+            pagingSourceFactory = { runActionRepository.allPaged() }
+        ).flow
             .cancellable()
+            .distinctUntilChanged()
             .flowOn(dispatcher)
     }
 }
 
-class GetRunActionUseCase @Inject constructor(
-    private val getRunActionEntityUseCase: GetRunActionEntityUseCase,
+class GetAllPagedRunActionUseCase @Inject constructor(
+    private val getAllPagedRunActionEntityUseCase: GetAllPagedRunActionEntityUseCase,
     private val getGpsEntityByRunActionUseCase: GetGpsEntityByRunActionUseCase,
     private val getStepsEntityByRunActionUseCase: GetStepsEntityByRunActionUseCase
 ) {
     operator fun invoke(
-        id: Long,
         dispatcher: CoroutineDispatcher = Dispatchers.IO
-    ): Flow<Data<out RunAction?>> {
-        return getRunActionEntityUseCase(id, dispatcher).map { runActionEntity ->
-            val entity = runActionEntity?.let { entity ->
+    ): Flow<PagingData<RunAction>> {
+        return getAllPagedRunActionEntityUseCase(dispatcher).map { list ->
+            list.map { entity ->
                 val totalDistance =
                     getGpsEntityByRunActionUseCase(entity.id, dispatcher).map { it.totalDistance() }
                 val totalSteps =
@@ -53,8 +60,6 @@ class GetRunActionUseCase @Inject constructor(
                     totalSteps = totalSteps
                 )
             }
-
-            Data.Loaded(entity)
         }
             .flowOn(dispatcher)
     }

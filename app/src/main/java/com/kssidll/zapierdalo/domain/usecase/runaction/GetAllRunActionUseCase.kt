@@ -3,7 +3,6 @@ package com.kssidll.zapierdalo.domain.usecase.runaction
 import com.kssidll.zapierdalo.data.data.RunActionEntity
 import com.kssidll.zapierdalo.data.data.totalDistance
 import com.kssidll.zapierdalo.data.data.totalSteps
-import com.kssidll.zapierdalo.domain.data.Data
 import com.kssidll.zapierdalo.domain.data.RunAction
 import com.kssidll.zapierdalo.domain.data.toDomain
 import com.kssidll.zapierdalo.domain.repository.RunActionRepository
@@ -18,31 +17,29 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
-class GetRunActionEntityUseCase @Inject constructor(
-    private val runActionRepository: RunActionRepository,
+class GetAllRunActionEntityUseCase @Inject constructor(
+    private val runActionRepository: RunActionRepository
 ) {
     operator fun invoke(
-        id: Long,
         dispatcher: CoroutineDispatcher = Dispatchers.IO
-    ): Flow<RunActionEntity?> {
-        return runActionRepository.get(id)
+    ): Flow<List<RunActionEntity>> {
+        return runActionRepository.all()
             .distinctUntilChanged()
             .cancellable()
             .flowOn(dispatcher)
     }
 }
 
-class GetRunActionUseCase @Inject constructor(
-    private val getRunActionEntityUseCase: GetRunActionEntityUseCase,
+class GetAllRunActionUseCase @Inject constructor(
+    private val getAllRunActionEntityUseCase: GetAllRunActionEntityUseCase,
     private val getGpsEntityByRunActionUseCase: GetGpsEntityByRunActionUseCase,
     private val getStepsEntityByRunActionUseCase: GetStepsEntityByRunActionUseCase
 ) {
     operator fun invoke(
-        id: Long,
         dispatcher: CoroutineDispatcher = Dispatchers.IO
-    ): Flow<Data<out RunAction?>> {
-        return getRunActionEntityUseCase(id, dispatcher).map { runActionEntity ->
-            val entity = runActionEntity?.let { entity ->
+    ): Flow<List<RunAction>> {
+        return getAllRunActionEntityUseCase(dispatcher).map { list ->
+            list.map { entity ->
                 val totalDistance =
                     getGpsEntityByRunActionUseCase(entity.id, dispatcher).map { it.totalDistance() }
                 val totalSteps =
@@ -53,8 +50,6 @@ class GetRunActionUseCase @Inject constructor(
                     totalSteps = totalSteps
                 )
             }
-
-            Data.Loaded(entity)
         }
             .flowOn(dispatcher)
     }

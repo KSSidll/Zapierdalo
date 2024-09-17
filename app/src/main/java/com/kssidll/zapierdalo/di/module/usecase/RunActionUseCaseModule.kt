@@ -1,10 +1,18 @@
 package com.kssidll.zapierdalo.di.module.usecase
 
 import com.kssidll.zapierdalo.domain.repository.RunActionRepository
+import com.kssidll.zapierdalo.domain.usecase.gps.GetGpsEntityByRunActionUseCase
+import com.kssidll.zapierdalo.domain.usecase.runaction.GetAllPagedRunActionEntityUseCase
+import com.kssidll.zapierdalo.domain.usecase.runaction.GetAllPagedRunActionUseCase
+import com.kssidll.zapierdalo.domain.usecase.runaction.GetAllRunActionEntityUseCase
+import com.kssidll.zapierdalo.domain.usecase.runaction.GetAllRunActionUseCase
+import com.kssidll.zapierdalo.domain.usecase.runaction.GetLatestRunActionEntityUseCase
 import com.kssidll.zapierdalo.domain.usecase.runaction.GetLatestRunActionUseCase
+import com.kssidll.zapierdalo.domain.usecase.runaction.GetRunActionEntityUseCase
 import com.kssidll.zapierdalo.domain.usecase.runaction.GetRunActionUseCase
 import com.kssidll.zapierdalo.domain.usecase.runaction.InsertRunActionEntityUseCase
 import com.kssidll.zapierdalo.domain.usecase.runaction.UpdateRunActionEntityUseCase
+import com.kssidll.zapierdalo.domain.usecase.steps.GetStepsEntityByRunActionUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -32,17 +40,91 @@ class RunActionUseCaseModule {
 
     @Provides
     @ViewModelScoped
+    fun provideGetRunActionEntityUseCase(
+        runActionRepository: RunActionRepository,
+    ): GetRunActionEntityUseCase {
+        return GetRunActionEntityUseCase(runActionRepository)
+    }
+
+    @Provides
+    @ViewModelScoped
     fun provideGetRunActionUseCase(
-        runActionRepository: RunActionRepository
+        getRunActionEntityUseCase: GetRunActionEntityUseCase,
+        getGpsEntityByRunActionUseCase: GetGpsEntityByRunActionUseCase,
+        getStepsEntityByRunActionUseCase: GetStepsEntityByRunActionUseCase
     ): GetRunActionUseCase {
-        return GetRunActionUseCase(runActionRepository)
+        return GetRunActionUseCase(
+            getRunActionEntityUseCase = getRunActionEntityUseCase,
+            getGpsEntityByRunActionUseCase = getGpsEntityByRunActionUseCase,
+            getStepsEntityByRunActionUseCase = getStepsEntityByRunActionUseCase
+        )
+    }
+
+    @Provides
+    @ViewModelScoped
+    fun provideGetAllRunActionEntityUseCase(
+        runActionRepository: RunActionRepository
+    ): GetAllRunActionEntityUseCase {
+        return GetAllRunActionEntityUseCase(runActionRepository)
+    }
+
+    @Provides
+    @ViewModelScoped
+    fun provideGetAllRunActionUseCase(
+        getAllRunActionEntityUseCase: GetAllRunActionEntityUseCase,
+        getGpsEntityByRunActionUseCase: GetGpsEntityByRunActionUseCase,
+        getStepsEntityByRunActionUseCase: GetStepsEntityByRunActionUseCase
+    ): GetAllRunActionUseCase {
+        return GetAllRunActionUseCase(
+            getAllRunActionEntityUseCase = getAllRunActionEntityUseCase,
+            getGpsEntityByRunActionUseCase = getGpsEntityByRunActionUseCase,
+            getStepsEntityByRunActionUseCase = getStepsEntityByRunActionUseCase
+        )
+    }
+
+    @Provides
+    @ViewModelScoped
+    fun provideGetAllPagedRunActionEntityUseCase(
+        runActionRepository: RunActionRepository
+    ): GetAllPagedRunActionEntityUseCase {
+        return GetAllPagedRunActionEntityUseCase(
+            runActionRepository = runActionRepository
+        )
+    }
+
+    @Provides
+    @ViewModelScoped
+    fun provideGetAllPagedRunActionUseCase(
+        getAllPagedRunActionEntityUseCase: GetAllPagedRunActionEntityUseCase,
+        getGpsEntityByRunActionUseCase: GetGpsEntityByRunActionUseCase,
+        getStepsEntityByRunActionUseCase: GetStepsEntityByRunActionUseCase
+    ): GetAllPagedRunActionUseCase {
+        return GetAllPagedRunActionUseCase(
+            getAllPagedRunActionEntityUseCase = getAllPagedRunActionEntityUseCase,
+            getGpsEntityByRunActionUseCase = getGpsEntityByRunActionUseCase,
+            getStepsEntityByRunActionUseCase = getStepsEntityByRunActionUseCase
+        )
+    }
+
+    @Provides
+    @ViewModelScoped
+    fun provideGetLatestRunActionEntityUseCase(
+        runActionRepository: RunActionRepository,
+    ): GetLatestRunActionEntityUseCase {
+        return GetLatestRunActionEntityUseCase(runActionRepository)
     }
 
     @Provides
     @ViewModelScoped
     fun provideGetLatestRunActionUseCase(
-        runActionRepository: RunActionRepository
+        getLatestRunActionEntityUseCase: GetLatestRunActionEntityUseCase,
+        getGpsEntityByRunActionUseCase: GetGpsEntityByRunActionUseCase,
+        getStepsEntityByRunActionUseCase: GetStepsEntityByRunActionUseCase
     ): GetLatestRunActionUseCase {
-        return GetLatestRunActionUseCase(runActionRepository)
+        return GetLatestRunActionUseCase(
+            getLatestRunActionEntityUseCase = getLatestRunActionEntityUseCase,
+            getGpsEntityByRunActionUseCase = getGpsEntityByRunActionUseCase,
+            getStepsEntityByRunActionUseCase = getStepsEntityByRunActionUseCase
+        )
     }
 }

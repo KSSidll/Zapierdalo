@@ -1,5 +1,6 @@
 package com.kssidll.zapierdalo.data.dao
 
+import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
@@ -30,8 +31,11 @@ interface RunActionDao {
     @Query("SELECT RunActionEntity.* FROM RunActionEntity WHERE RunActionEntity.id = :id")
     fun get(id: Long): Flow<RunActionEntity?>
 
-    @Query("SELECT RunActionEntity.* FROM RunActionEntity")
+    @Query("SELECT RunActionEntity.* FROM RunActionEntity ORDER BY RunActionEntity.id DESC")
     fun all(): Flow<List<RunActionEntity>>
+
+    @Query("SELECT RunActionEntity.* FROM RunActionEntity ORDER BY RunActionEntity.id DESC")
+    fun allPaged(): PagingSource<Int, RunActionEntity>
 
     @Query("SELECT RunActionEntity.* FROM RunActionEntity ORDER BY RunActionEntity.id DESC LIMIT 1")
     fun latest(): Flow<RunActionEntity?>

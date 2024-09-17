@@ -5,7 +5,8 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Ignore
 import androidx.room.PrimaryKey
-import kotlinx.serialization.Serializable
+import com.kssidll.zapierdalo.helper.totalDistance
+import org.osmdroid.util.GeoPoint
 import java.util.Calendar
 
 @Entity(
@@ -19,7 +20,6 @@ import java.util.Calendar
         )
     ]
 )
-@Serializable
 data class GpsEntity(
     @PrimaryKey(autoGenerate = true) val id: Long,
     @ColumnInfo(index = true) val runActionId: Long,
@@ -49,4 +49,20 @@ data class GpsEntity(
         speed = speed,
         timestamp = timestamp,
     )
+}
+
+fun GpsEntity.geoPoint(): GeoPoint {
+    return GeoPoint(latitude, longitude, altitude)
+}
+
+fun List<GpsEntity>.asGeoPointList(): List<GeoPoint> {
+    return map { it.geoPoint() }
+}
+
+fun List<GpsEntity>.lastGeoPoint(): GeoPoint? {
+    return lastOrNull()?.geoPoint()
+}
+
+fun List<GpsEntity>.totalDistance(): Double {
+    return asGeoPointList().totalDistance()
 }

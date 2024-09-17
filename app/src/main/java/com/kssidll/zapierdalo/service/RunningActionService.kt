@@ -35,12 +35,11 @@ import com.kssidll.zapierdalo.broadcast.RunningActionServiceStopActionReceiver
 import com.kssidll.zapierdalo.data.data.GpsEntity
 import com.kssidll.zapierdalo.data.data.RunActionEntity
 import com.kssidll.zapierdalo.data.data.StepsEntity
-import com.kssidll.zapierdalo.domain.data.toEntity
 import com.kssidll.zapierdalo.domain.usecase.gps.InsertGpsEntityUseCase
-import com.kssidll.zapierdalo.domain.usecase.runaction.GetRunActionUseCase
+import com.kssidll.zapierdalo.domain.usecase.runaction.GetRunActionEntityUseCase
 import com.kssidll.zapierdalo.domain.usecase.runaction.InsertRunActionEntityUseCase
 import com.kssidll.zapierdalo.domain.usecase.runaction.UpdateRunActionEntityUseCase
-import com.kssidll.zapierdalo.domain.usecase.steps.GetStepsUseCase
+import com.kssidll.zapierdalo.domain.usecase.steps.GetStepsEntityUseCase
 import com.kssidll.zapierdalo.domain.usecase.steps.InsertStepsEntityUseCase
 import com.kssidll.zapierdalo.domain.usecase.steps.UpdateStepsEntityUseCase
 import com.kssidll.zapierdalo.helper.checkPermission
@@ -78,7 +77,7 @@ class RunningActionService: Service(), SensorEventListener {
     lateinit var insertRunActionEntityUseCase: InsertRunActionEntityUseCase
 
     @Inject
-    lateinit var getRunActionUseCase: GetRunActionUseCase
+    lateinit var getRunActionEntityUseCase: GetRunActionEntityUseCase
 
     @Inject
     lateinit var updateRunActionEntityUseCase: UpdateRunActionEntityUseCase
@@ -87,7 +86,7 @@ class RunningActionService: Service(), SensorEventListener {
     lateinit var insertStepsEntityUseCase: InsertStepsEntityUseCase
 
     @Inject
-    lateinit var getStepsUseCase: GetStepsUseCase
+    lateinit var getStepsEntityUseCase: GetStepsEntityUseCase
 
     @Inject
     lateinit var updateStepsEntityUseCase: UpdateStepsEntityUseCase
@@ -308,7 +307,7 @@ class RunningActionService: Service(), SensorEventListener {
         try {
             serviceScope.launch {
                 stepsId?.let { stepsId ->
-                    val stepsEntity = getStepsUseCase(stepsId).first()()!!.toEntity().copy(
+                    val stepsEntity = getStepsEntityUseCase(stepsId).first()!!.copy(
                         endTimestamp = Calendar.getInstance().timeInMillis
                     )
 
@@ -317,7 +316,7 @@ class RunningActionService: Service(), SensorEventListener {
 
                 runActionId?.let { runActionId ->
                     val runActionEntity =
-                        getRunActionUseCase(runActionId).first()()!!.toEntity().copy(
+                        getRunActionEntityUseCase(runActionId).first()!!.copy(
                             endTimestamp = Calendar.getInstance().timeInMillis
                         )
 
@@ -477,7 +476,7 @@ class RunningActionService: Service(), SensorEventListener {
 
                             stepsStartCount = steps
                         } else {
-                            val entity = getStepsUseCase(stepsId!!).first()()!!.toEntity().copy(
+                            val entity = getStepsEntityUseCase(stepsId!!).first()!!.copy(
                                 steps = steps - stepsStartCount!!
                             )
 
@@ -498,8 +497,11 @@ class RunningActionService: Service(), SensorEventListener {
     object Permissions {
         @RequiresApi(Build.VERSION_CODES.TIRAMISU)
         private const val NOTIFICATIONS = Manifest.permission.POST_NOTIFICATIONS
+
         private const val LOCATION_COARSE = Manifest.permission.ACCESS_COARSE_LOCATION
         private const val LOCATION_FINE = Manifest.permission.ACCESS_FINE_LOCATION
+
+        @RequiresApi(Build.VERSION_CODES.Q)
         private const val ACTIVITY_RECOGNITION = Manifest.permission.ACTIVITY_RECOGNITION
 
         val ALL = buildList {
@@ -508,7 +510,9 @@ class RunningActionService: Service(), SensorEventListener {
             }
             add(LOCATION_COARSE)
             add(LOCATION_FINE)
-            add(ACTIVITY_RECOGNITION)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                add(ACTIVITY_RECOGNITION)
+            }
         }.toTypedArray()
 
         val LOCATION = buildList {
@@ -517,7 +521,9 @@ class RunningActionService: Service(), SensorEventListener {
         }.toTypedArray()
 
         val ACTIVITY = buildList {
-            add(ACTIVITY_RECOGNITION)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                add(ACTIVITY_RECOGNITION)
+            }
         }.toTypedArray()
     }
 

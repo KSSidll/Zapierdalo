@@ -1,5 +1,6 @@
 package com.kssidll.zapierdalo.data.data
 
+import androidx.compose.ui.util.fastSumBy
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
@@ -38,4 +39,8 @@ data class StepsEntity(
         endTimestamp = endTimestamp,
         steps = steps
     )
+}
+
+fun List<StepsEntity>.totalSteps(): Long {
+    return fastSumBy { it.steps.toInt() }.toLong()
 }

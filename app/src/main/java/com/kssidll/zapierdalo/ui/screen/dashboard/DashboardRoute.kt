@@ -36,6 +36,10 @@ fun DashboardRoute(
                     requestLocationPermissionLauncher.launchMultiplePermissionRequest()
                 }
 
+                is DashboardEvent.StopRunningAction -> {
+                    viewModel.handleEvent(event)
+                }
+
                 is DashboardEvent.ChangeScreenDestination -> {
                     viewModel.handleEvent(event)
                 }

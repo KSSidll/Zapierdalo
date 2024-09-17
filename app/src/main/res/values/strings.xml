@@ -17,4 +17,13 @@
 
     <string name="dashboard">Dashboard</string>
     <string name="runs">Runs</string>
+    <string name="today">Today</string>
+    <string name="yesterday">Yesterday</string>
+    <string name="run_date_format">MMM d, yyyy</string>
+
+    <string name="dark">Dark</string>
+    <string name="light">Light</string>
+
+    <string name="stop">Stop</string>
+    <string name="start">Start</string>
 </resources>

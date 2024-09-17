@@ -1,9 +1,8 @@
 package com.kssidll.zapierdalo.di.module.usecase
 
 import com.kssidll.zapierdalo.domain.repository.StepsRepository
-import com.kssidll.zapierdalo.domain.usecase.runaction.GetRunActionUseCase
-import com.kssidll.zapierdalo.domain.usecase.steps.GetStepsByRunActionUseCase
-import com.kssidll.zapierdalo.domain.usecase.steps.GetStepsUseCase
+import com.kssidll.zapierdalo.domain.usecase.steps.GetStepsEntityByRunActionUseCase
+import com.kssidll.zapierdalo.domain.usecase.steps.GetStepsEntityUseCase
 import com.kssidll.zapierdalo.domain.usecase.steps.InsertStepsEntityUseCase
 import com.kssidll.zapierdalo.domain.usecase.steps.UpdateStepsEntityUseCase
 import dagger.Module
@@ -25,14 +24,10 @@ class StepsUseCaseModule {
 
     @Provides
     @ViewModelScoped
-    fun provideGetStepsUseCase(
+    fun provideGetStepsEntityUseCase(
         stepsRepository: StepsRepository,
-        getRunActionUseCase: GetRunActionUseCase
-    ): GetStepsUseCase {
-        return GetStepsUseCase(
-            stepsRepository = stepsRepository,
-            getRunActionUseCase = getRunActionUseCase
-        )
+    ): GetStepsEntityUseCase {
+        return GetStepsEntityUseCase(stepsRepository)
     }
 
     @Provides
@@ -47,13 +42,9 @@ class StepsUseCaseModule {
 
     @Provides
     @ViewModelScoped
-    fun provideGetStepsByRunActionUseCase(
+    fun provideGetStepsEntityByRunActionUseCase(
         stepsRepository: StepsRepository,
-        getRunActionUseCase: GetRunActionUseCase
-    ): GetStepsByRunActionUseCase {
-        return GetStepsByRunActionUseCase(
-            stepsRepository = stepsRepository,
-            getRunActionUseCase = getRunActionUseCase
-        )
+    ): GetStepsEntityByRunActionUseCase {
+        return GetStepsEntityByRunActionUseCase(stepsRepository)
     }
 }
