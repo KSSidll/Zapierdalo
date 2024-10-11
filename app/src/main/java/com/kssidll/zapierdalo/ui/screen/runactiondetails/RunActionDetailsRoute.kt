@@ -8,13 +8,17 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Composable
 fun RunActionDetailsRoute(
-    id: Long,
+    navigateBack: () -> Unit,
     viewModel: RunActionDetailsViewModel = hiltViewModel()
 ) {
-
-    viewModel.init(id)
-
     RunActionDetailsScreen(
         uiState = viewModel.uiState.collectAsStateWithLifecycle(minActiveState = Lifecycle.State.RESUMED).value,
+        onEvent = { event ->
+            when (event) {
+                RunActionDetailsEvent.NavigateBack -> {
+                    navigateBack()
+                }
+            }
+        }
     )
 }

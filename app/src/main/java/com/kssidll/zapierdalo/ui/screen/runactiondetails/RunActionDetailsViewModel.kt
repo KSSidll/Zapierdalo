@@ -1,13 +1,17 @@
 package com.kssidll.zapierdalo.ui.screen.runactiondetails
 
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
+import com.kssidll.zapierdalo.NavigationDestinations
 import com.kssidll.zapierdalo.domain.data.Data
 import com.kssidll.zapierdalo.domain.data.RunAction
+import com.kssidll.zapierdalo.domain.data.RunActionDetails
+import com.kssidll.zapierdalo.domain.usecase.runaction.GetRunActionDetailsUseCase
 import com.kssidll.zapierdalo.domain.usecase.runaction.GetRunActionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,30 +20,40 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class RunActionDetailsUiState(
-    val runActionData: Data<out RunAction?> = Data.Loading()
+    val runActionDetails: Data<out RunActionDetails?> = Data.Loading()
 )
+
+sealed class RunActionDetailsEvent {
+    data object NavigateBack: RunActionDetailsEvent()
+}
 
 @HiltViewModel
 class RunActionDetailsViewModel @Inject constructor(
-    private val getRunActionUseCase: GetRunActionUseCase
+    private val getRunActionDetailsUseCase: GetRunActionDetailsUseCase,
+    savedStateHandle: SavedStateHandle,
 ): ViewModel() {
     private val _uiState = MutableStateFlow(
         RunActionDetailsUiState()
     )
     val uiState: StateFlow<RunActionDetailsUiState> = _uiState.asStateFlow()
 
-    private var collectionJob: Job? = null
+    init {
+        val runActionEntityId = savedStateHandle.toRoute<NavigationDestinations.RunActionDetails>().runActionEntityId
 
-    fun init(id: Long) {
-        collectionJob?.cancel()
-        collectionJob = viewModelScope.launch {
-            getRunActionUseCase(id).collect {
+        viewModelScope.launch {
+            getRunActionDetailsUseCase(runActionEntityId).collect {
                 _uiState.update { currentState ->
                     currentState.copy(
-                        runActionData = it
+                        runActionDetails = it
                     )
                 }
             }
+        }
+    }
+
+    fun handleEvent(event: RunActionDetailsEvent) {
+        when (event) {
+            RunActionDetailsEvent.NavigateBack -> {}
         }
     }
 }

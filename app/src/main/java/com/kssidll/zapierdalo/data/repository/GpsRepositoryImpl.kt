@@ -21,7 +21,7 @@ class GpsRepositoryImpl(private val dao: GpsDao): GpsRepository {
     override fun byRunActionId(runActionId: Long): Flow<List<GpsEntity>> {
         return dao.byRunActionId(runActionId)
             .map { list ->
-                list.filter { it.accuracy < 19f }
+                list.filter { it.accuracy < 8f }
             }
     }
 

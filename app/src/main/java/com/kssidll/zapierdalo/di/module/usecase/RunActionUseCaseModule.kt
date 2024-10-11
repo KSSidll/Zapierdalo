@@ -8,6 +8,7 @@ import com.kssidll.zapierdalo.domain.usecase.runaction.GetAllRunActionEntityUseC
 import com.kssidll.zapierdalo.domain.usecase.runaction.GetAllRunActionUseCase
 import com.kssidll.zapierdalo.domain.usecase.runaction.GetLatestRunActionEntityUseCase
 import com.kssidll.zapierdalo.domain.usecase.runaction.GetLatestRunActionUseCase
+import com.kssidll.zapierdalo.domain.usecase.runaction.GetRunActionDetailsUseCase
 import com.kssidll.zapierdalo.domain.usecase.runaction.GetRunActionEntityUseCase
 import com.kssidll.zapierdalo.domain.usecase.runaction.GetRunActionUseCase
 import com.kssidll.zapierdalo.domain.usecase.runaction.InsertRunActionEntityUseCase
@@ -54,6 +55,20 @@ class RunActionUseCaseModule {
         getStepsEntityByRunActionUseCase: GetStepsEntityByRunActionUseCase
     ): GetRunActionUseCase {
         return GetRunActionUseCase(
+            getRunActionEntityUseCase = getRunActionEntityUseCase,
+            getGpsEntityByRunActionUseCase = getGpsEntityByRunActionUseCase,
+            getStepsEntityByRunActionUseCase = getStepsEntityByRunActionUseCase
+        )
+    }
+
+    @Provides
+    @ViewModelScoped
+    fun provideGetRunActionDetailsUseCase(
+        getRunActionEntityUseCase: GetRunActionEntityUseCase,
+        getGpsEntityByRunActionUseCase: GetGpsEntityByRunActionUseCase,
+        getStepsEntityByRunActionUseCase: GetStepsEntityByRunActionUseCase
+    ): GetRunActionDetailsUseCase {
+        return GetRunActionDetailsUseCase(
             getRunActionEntityUseCase = getRunActionEntityUseCase,
             getGpsEntityByRunActionUseCase = getGpsEntityByRunActionUseCase,
             getStepsEntityByRunActionUseCase = getStepsEntityByRunActionUseCase

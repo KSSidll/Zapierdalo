@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -86,7 +87,13 @@ fun DashboardRunsScreen(
                         is RunActionElement.Element -> {
                             val runAction = runActionElement.data
 
-                            Column {
+                            Column(
+                                modifier = Modifier
+                                    .fillParentMaxWidth()
+                                    .clickable {
+                                        onEvent(DashboardEvent.NavigateRunActionDetails(runAction))
+                                    }
+                            ) {
                                 Spacer(modifier = Modifier.height(6.dp))
 
                                 Row(

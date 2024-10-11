@@ -45,6 +45,7 @@ data class DashboardUiState(
 
 sealed class DashboardEvent {
     data object NavigateSettings: DashboardEvent()
+    data class NavigateRunActionDetails(val runAction: RunAction): DashboardEvent()
     data object StartRunningAction: DashboardEvent()
     data object StopRunningAction: DashboardEvent()
     data class ChangeScreenDestination(val newDestination: DashboardDestinations): DashboardEvent()
@@ -116,6 +117,7 @@ class DashboardViewModel @Inject constructor(
     fun handleEvent(event: DashboardEvent) {
         when (event) {
             is DashboardEvent.NavigateSettings -> {}
+            is DashboardEvent.NavigateRunActionDetails -> {}
 
             is DashboardEvent.StartRunningAction -> {
                 startRunningActionServiceUseCase()

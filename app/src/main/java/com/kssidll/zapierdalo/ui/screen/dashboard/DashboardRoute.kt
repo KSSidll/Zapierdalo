@@ -7,12 +7,14 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import com.kssidll.zapierdalo.domain.data.toEntity
 import com.kssidll.zapierdalo.service.RunningActionService
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun DashboardRoute(
     navigateSettings: () -> Unit,
+    navigateRunActionDetails: (runActionEntityId: Long) -> Unit,
     viewModel: DashboardViewModel = hiltViewModel()
 ) {
     val requestLocationPermissionLauncher = rememberMultiplePermissionsState(
@@ -30,6 +32,10 @@ fun DashboardRoute(
             when (event) {
                 is DashboardEvent.NavigateSettings -> {
                     navigateSettings()
+                }
+
+                is DashboardEvent.NavigateRunActionDetails -> {
+                    navigateRunActionDetails(event.runAction.toEntity().id)
                 }
 
                 is DashboardEvent.StartRunningAction -> {
