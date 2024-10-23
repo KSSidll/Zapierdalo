@@ -6,9 +6,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.kssidll.zapierdalo.domain.data.toEntity
-import com.kssidll.zapierdalo.service.RunningActionService
+import com.kssidll.zapierdalo.service.rememberRunningActionServicePreparationLauncher
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -17,13 +16,11 @@ fun DashboardRoute(
     navigateRunActionDetails: (runActionEntityId: Long) -> Unit,
     viewModel: DashboardViewModel = hiltViewModel()
 ) {
-    val requestLocationPermissionLauncher = rememberMultiplePermissionsState(
-        permissions = RunningActionService.Permissions.ALL.asList(),
-        onPermissionsResult = { permissionResultMap ->
-            if (permissionResultMap.all { it.value }) {
-                viewModel.handleEvent(DashboardEvent.StartRunningAction)
-            }
-        }
+    val runningActionServicePreparationLauncher = rememberRunningActionServicePreparationLauncher(
+        onSuccess = {
+            viewModel.handleEvent(DashboardEvent.StartRunningAction)
+        },
+        onFailure = {}
     )
 
     DashboardScreen(
@@ -39,7 +36,7 @@ fun DashboardRoute(
                 }
 
                 is DashboardEvent.StartRunningAction -> {
-                    requestLocationPermissionLauncher.launchMultiplePermissionRequest()
+                    runningActionServicePreparationLauncher.launchMultiplePermissionRequest()
                 }
 
                 is DashboardEvent.StopRunningAction -> {

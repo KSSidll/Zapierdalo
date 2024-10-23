@@ -7,10 +7,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.kssidll.zapierdalo.NavigationDestinations
 import com.kssidll.zapierdalo.domain.data.Data
-import com.kssidll.zapierdalo.domain.data.RunAction
 import com.kssidll.zapierdalo.domain.data.RunActionDetails
 import com.kssidll.zapierdalo.domain.usecase.runaction.GetRunActionDetailsUseCase
-import com.kssidll.zapierdalo.domain.usecase.runaction.GetRunActionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -38,7 +36,8 @@ class RunActionDetailsViewModel @Inject constructor(
     val uiState: StateFlow<RunActionDetailsUiState> = _uiState.asStateFlow()
 
     init {
-        val runActionEntityId = savedStateHandle.toRoute<NavigationDestinations.RunActionDetails>().runActionEntityId
+        val runActionEntityId =
+            savedStateHandle.toRoute<NavigationDestinations.RunActionDetails>().runActionEntityId
 
         viewModelScope.launch {
             getRunActionDetailsUseCase(runActionEntityId).collect {

@@ -117,6 +117,7 @@ class DashboardViewModel @Inject constructor(
     fun handleEvent(event: DashboardEvent) {
         when (event) {
             is DashboardEvent.NavigateSettings -> {}
+
             is DashboardEvent.NavigateRunActionDetails -> {}
 
             is DashboardEvent.StartRunningAction -> {

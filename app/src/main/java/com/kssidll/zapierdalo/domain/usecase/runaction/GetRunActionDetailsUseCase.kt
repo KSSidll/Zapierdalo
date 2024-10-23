@@ -10,7 +10,6 @@ import com.kssidll.zapierdalo.domain.usecase.steps.GetStepsEntityByRunActionUseC
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -28,7 +27,8 @@ class GetRunActionDetailsUseCase @Inject constructor(
             val entity = runActionEntity?.let { entity ->
                 val gpsEntity = getGpsEntityByRunActionUseCase(entity.id, dispatcher)
                 val totalDistance = gpsEntity.map { it.totalDistance() }
-                val gpsPoints = gpsEntity.map { gpsEntityList -> gpsEntityList.map { it.toDomain() } }
+                val gpsPoints =
+                    gpsEntity.map { gpsEntityList -> gpsEntityList.map { it.toDomain() } }
 
                 val totalSteps =
                     getStepsEntityByRunActionUseCase(entity.id, dispatcher).map { it.totalSteps() }

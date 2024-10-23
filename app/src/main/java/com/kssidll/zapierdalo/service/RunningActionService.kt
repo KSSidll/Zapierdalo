@@ -1,6 +1,7 @@
 package com.kssidll.zapierdalo.service
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.PendingIntent
 import android.app.Service
@@ -8,6 +9,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.IntentSender
 import android.content.pm.ServiceInfo
 import android.hardware.Sensor
 import android.hardware.SensorEvent
@@ -16,17 +18,28 @@ import android.hardware.SensorManager
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.MultiplePermissionsState
+import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.LocationSettingsRequest
 import com.google.android.gms.location.Priority
 import com.kssidll.zapierdalo.APPLICATION_NAME
 import com.kssidll.zapierdalo.MainActivity
@@ -60,6 +73,70 @@ enum class RunningActionServiceActions {
     START,
     PAUSE,
     STOP
+}
+
+@OptIn(ExperimentalPermissionsApi::class)
+@SuppressLint("ComposeNamingUppercase", "ComposableNaming")
+@Composable
+@Stable
+fun rememberRunningActionServicePreparationLauncher(
+    onSuccess: () -> Unit,
+    onFailure: () -> Unit
+): MultiplePermissionsState {
+    val context = LocalContext.current
+
+    val requestLocationSettings =
+        rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) {
+            onSuccess()
+        }
+
+    val requestLocationSetting: () -> Unit = {
+        val settingsRequest = LocationSettingsRequest.Builder()
+            .addLocationRequest(RunningActionService.locationRequest)
+            .build()
+
+        val client = LocationServices.getSettingsClient(context)
+        val settingsTask = client.checkLocationSettings(settingsRequest)
+
+        settingsTask.addOnSuccessListener {
+            onSuccess()
+        }
+
+        settingsTask.addOnFailureListener { exception ->
+            if (exception is ResolvableApiException) {
+                try {
+                    val intentSenderRequest = IntentSenderRequest
+                        .Builder(exception.resolution)
+                        .build()
+
+                    requestLocationSettings.launch(intentSenderRequest)
+                } catch (_: IntentSender.SendIntentException) {
+                    // Ignore
+                }
+            }
+        }
+    }
+
+    return rememberMultiplePermissionsState(
+        permissions = RunningActionService.Permissions.ALL.asList(),
+        onPermissionsResult = { permissionResultMap ->
+            val locationPermissions = permissionResultMap.all {
+                it.key in RunningActionService.Permissions.LOCATION && it.value
+            }
+
+            val activitiyPermissions = permissionResultMap.all {
+                it.key in RunningActionService.Permissions.ACTIVITY && it.value
+            }
+
+            if (locationPermissions) {
+                requestLocationSetting()
+            } else if (activitiyPermissions) {
+                onSuccess()
+            } else {
+                onFailure()
+            }
+        }
+    )
 }
 
 @AndroidEntryPoint
@@ -268,12 +345,6 @@ class RunningActionService: Service(), SensorEventListener {
                 }
             }
         }
-
-        val locationRequest = LocationRequest.Builder(
-            Priority.PRIORITY_HIGH_ACCURACY,
-            1000
-        )
-            .build()
 
         if (checkPermission(applicationContext, Permissions.LOCATION.asList())) {
             fusedLocationClient.requestLocationUpdates(
@@ -532,6 +603,13 @@ class RunningActionService: Service(), SensorEventListener {
         const val SERVICE_NAME = TAG
         const val SERVICE_NOTIFICATION_ID = 1
         const val NOTIFICATION_CHANNEL_ID = TAG
+
+
+        val locationRequest = LocationRequest.Builder(
+            Priority.PRIORITY_HIGH_ACCURACY,
+            1000
+        )
+            .build()
 
         /**
          * Helper function to start the service

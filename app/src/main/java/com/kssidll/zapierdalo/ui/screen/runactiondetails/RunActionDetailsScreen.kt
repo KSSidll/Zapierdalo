@@ -3,7 +3,6 @@ package com.kssidll.zapierdalo.ui.screen.runactiondetails
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -11,7 +10,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -26,7 +24,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kssidll.zapierdalo.domain.data.asGeoPointList
 import com.kssidll.zapierdalo.domain.data.isLoaded
 import com.kssidll.zapierdalo.domain.data.lastGeoPoint
-import com.kssidll.zapierdalo.helper.none
 import com.kssidll.zapierdalo.helper.orPointZero
 import com.kssidll.zapierdalo.ui.component.SecondaryAppBar
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
@@ -53,7 +50,10 @@ fun RunActionDetailsScreen(
 
     var sfpo: SimpleFastPointOverlay? by remember { mutableStateOf(null) }
 
-    val gpsPoints = uiState.runActionDetails()?.gpsPoints?.collectAsStateWithLifecycle(emptyList(), minActiveState = Lifecycle.State.RESUMED)?.value.orEmpty()
+    val gpsPoints = uiState.runActionDetails()?.gpsPoints?.collectAsStateWithLifecycle(
+        emptyList(),
+        minActiveState = Lifecycle.State.RESUMED
+    )?.value.orEmpty()
 
     LaunchedEffect(mapView, uiState.runActionDetails, gpsPoints) {
         if (uiState.runActionDetails.isLoaded()) {
