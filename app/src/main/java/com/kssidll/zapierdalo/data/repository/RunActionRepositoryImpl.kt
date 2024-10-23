@@ -22,6 +22,10 @@ class RunActionRepositoryImpl(private val dao: RunActionDao): RunActionRepositor
 
     // Delete
 
+    override suspend fun delete(entity: RunActionEntity) {
+        dao.delete(entity)
+    }
+
     // Read
 
     override fun get(id: Long): Flow<RunActionEntity?> {

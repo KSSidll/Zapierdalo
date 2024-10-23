@@ -24,4 +24,5 @@
 
     <string name="stop">Zatrzymaj</string>
     <string name="start">Rozpocznij</string>
+    <string name="delete">Usuń</string>
 </resources>

@@ -15,7 +15,9 @@ fun RunActionDetailsRoute(
         uiState = viewModel.uiState.collectAsStateWithLifecycle(minActiveState = Lifecycle.State.RESUMED).value,
         onEvent = { event ->
             when (event) {
-                RunActionDetailsEvent.NavigateBack -> {
+                is RunActionDetailsEvent.NavigateBack -> navigateBack()
+                is RunActionDetailsEvent.Delete -> {
+                    viewModel.handleEvent(event)
                     navigateBack()
                 }
             }

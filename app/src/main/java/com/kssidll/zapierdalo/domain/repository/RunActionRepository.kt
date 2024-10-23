@@ -24,6 +24,12 @@ interface RunActionRepository {
 
     // Delete
 
+    /**
+     * Delete [RunActionEntity] object from the database
+     * Matches by id
+     */
+    suspend fun delete(entity: RunActionEntity)
+
     // Read
 
     /**

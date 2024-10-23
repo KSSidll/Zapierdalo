@@ -2,6 +2,7 @@ package com.kssidll.zapierdalo.di.module.usecase
 
 import com.kssidll.zapierdalo.domain.repository.RunActionRepository
 import com.kssidll.zapierdalo.domain.usecase.gps.GetGpsEntityByRunActionUseCase
+import com.kssidll.zapierdalo.domain.usecase.runaction.DeleteRunActionEntityUseCase
 import com.kssidll.zapierdalo.domain.usecase.runaction.GetAllPagedRunActionEntityUseCase
 import com.kssidll.zapierdalo.domain.usecase.runaction.GetAllPagedRunActionUseCase
 import com.kssidll.zapierdalo.domain.usecase.runaction.GetAllRunActionEntityUseCase
@@ -37,6 +38,14 @@ class RunActionUseCaseModule {
         runActionRepository: RunActionRepository
     ): UpdateRunActionEntityUseCase {
         return UpdateRunActionEntityUseCase(runActionRepository)
+    }
+
+    @Provides
+    @ViewModelScoped
+    fun provideDeleteRunActionEntityUseCase(
+        runActionRepository: RunActionRepository
+    ): DeleteRunActionEntityUseCase {
+        return DeleteRunActionEntityUseCase(runActionRepository)
     }
 
     @Provides
