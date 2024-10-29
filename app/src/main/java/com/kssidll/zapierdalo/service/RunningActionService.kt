@@ -120,11 +120,11 @@ fun rememberRunningActionServicePreparationLauncher(
     return rememberMultiplePermissionsState(
         permissions = RunningActionService.Permissions.ALL.asList(),
         onPermissionsResult = { permissionResultMap ->
-            val locationPermissions = permissionResultMap.all {
+            val locationPermissions = permissionResultMap.any {
                 it.key in RunningActionService.Permissions.LOCATION && it.value
             }
 
-            val activitiyPermissions = permissionResultMap.all {
+            val activitiyPermissions = permissionResultMap.any {
                 it.key in RunningActionService.Permissions.ACTIVITY && it.value
             }
 
