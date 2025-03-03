@@ -1,7 +1,7 @@
-package com.kssidll.zapierdalo.domain.usecase.gps
+package com.kssidll.zapierdalo.domain.usecase.runactiondetails
 
-import com.kssidll.zapierdalo.data.data.GpsEntity
-import com.kssidll.zapierdalo.domain.repository.GpsRepository
+import com.kssidll.zapierdalo.domain.data.RunActionDetails
+import com.kssidll.zapierdalo.domain.repository.RunActionDetailsRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -10,14 +10,14 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
 import javax.inject.Inject
 
-class GetGpsEntityByRunActionUseCase @Inject constructor(
-    private val gpsRepository: GpsRepository,
+class GetRunActionDetailsUseCase @Inject constructor(
+    private val runActionDetailsRepository: RunActionDetailsRepository
 ) {
     operator fun invoke(
-        runActionId: Long,
+        id: Long,
         dispatcher: CoroutineDispatcher = Dispatchers.IO
-    ): Flow<List<GpsEntity>> {
-        return gpsRepository.byRunActionId(runActionId)
+    ): Flow<RunActionDetails?> {
+        return runActionDetailsRepository.get(id)
             .distinctUntilChanged()
             .cancellable()
             .flowOn(dispatcher)

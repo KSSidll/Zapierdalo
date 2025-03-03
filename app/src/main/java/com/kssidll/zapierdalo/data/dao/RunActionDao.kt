@@ -5,8 +5,9 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
-import androidx.room.Update
+import androidx.room.SkipQueryVerification
 import com.kssidll.zapierdalo.data.data.RunActionEntity
+import com.kssidll.zapierdalo.data.data.view.RunAction
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -18,25 +19,32 @@ interface RunActionDao {
 
     // Update
 
-    @Update
-    suspend fun update(entity: RunActionEntity)
+    @Query("UPDATE RunActionEntity SET endTimestamp = :endTimestamp WHERE id = :entityId")
+    suspend fun setEndTimestamp(entityId: Long, endTimestamp: Long?)
 
     // Delete
 
     @Delete
     suspend fun delete(entity: RunActionEntity)
 
+    @Query("DELETE FROM RunActionEntity WHERE id = :entityId")
+    suspend fun delete(entityId: Long)
+
     // Read
 
-    @Query("SELECT RunActionEntity.* FROM RunActionEntity WHERE RunActionEntity.id = :id")
-    fun get(id: Long): Flow<RunActionEntity?>
+    @SkipQueryVerification
+    @Query("SELECT * FROM RunAction WHERE id = :id")
+    fun get(id: Long): Flow<RunAction?>
 
-    @Query("SELECT RunActionEntity.* FROM RunActionEntity ORDER BY RunActionEntity.id DESC")
-    fun all(): Flow<List<RunActionEntity>>
+    @SkipQueryVerification
+    @Query("SELECT * FROM RunAction ORDER BY id DESC")
+    fun all(): Flow<List<RunAction>>
 
-    @Query("SELECT RunActionEntity.* FROM RunActionEntity ORDER BY RunActionEntity.id DESC")
-    fun allPaged(): PagingSource<Int, RunActionEntity>
+    @SkipQueryVerification
+    @Query("SELECT * FROM RunAction ORDER BY id DESC")
+    fun allPaged(): PagingSource<Int, RunAction>
 
-    @Query("SELECT RunActionEntity.* FROM RunActionEntity ORDER BY RunActionEntity.id DESC LIMIT 1")
-    fun latest(): Flow<RunActionEntity?>
+    @SkipQueryVerification
+    @Query("SELECT * FROM RunAction ORDER BY id DESC LIMIT 1")
+    fun latest(): Flow<RunAction?>
 }

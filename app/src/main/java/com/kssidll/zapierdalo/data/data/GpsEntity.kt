@@ -1,12 +1,11 @@
 package com.kssidll.zapierdalo.data.data
 
-import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Ignore
+import androidx.room.Index
 import androidx.room.PrimaryKey
-import com.kssidll.zapierdalo.helper.totalDistance
-import org.osmdroid.util.GeoPoint
+import co.anbora.labs.spatia.geometry.Point
 import java.util.Calendar
 
 @Entity(
@@ -18,51 +17,35 @@ import java.util.Calendar
             onDelete = ForeignKey.CASCADE,
             onUpdate = ForeignKey.CASCADE
         )
-    ]
+    ],
+    indices = [
+        Index(value = ["runActionId"]),
+        Index(value = ["runActionId", "id"]),
+    ],
+    tableName = "GpsEntity"
 )
 data class GpsEntity(
-    @PrimaryKey(autoGenerate = true) val id: Long,
-    @ColumnInfo(index = true) val runActionId: Long,
-    @ColumnInfo val latitude: Double,
-    @ColumnInfo val longitude: Double,
-    @ColumnInfo val altitude: Double,
-    @ColumnInfo val accuracy: Float,
-    @ColumnInfo val speed: Float,
-    @ColumnInfo val timestamp: Long,
+    @PrimaryKey(autoGenerate = true)
+    val id: Long,
+    val runActionId: Long,
+    val location: Point,
+    val accuracy: Float,
+    val speed: Float, // in kmh
+    val timestamp: Long,
 ) {
     @Ignore
     constructor(
         runActionId: Long,
-        latitude: Double,
-        longitude: Double,
-        altitude: Double,
+        location: Point,
         accuracy: Float,
-        speed: Float,
+        speed: Float, // in kmh
         timestamp: Long = Calendar.getInstance().timeInMillis,
     ): this(
         id = 0,
         runActionId = runActionId,
-        latitude = latitude,
-        longitude = longitude,
-        altitude = altitude,
+        location = location,
         accuracy = accuracy,
         speed = speed,
         timestamp = timestamp,
     )
-}
-
-fun GpsEntity.geoPoint(): GeoPoint {
-    return GeoPoint(latitude, longitude, altitude)
-}
-
-fun List<GpsEntity>.asGeoPointList(): List<GeoPoint> {
-    return map { it.geoPoint() }
-}
-
-fun List<GpsEntity>.lastGeoPoint(): GeoPoint? {
-    return lastOrNull()?.geoPoint()
-}
-
-fun List<GpsEntity>.totalDistance(): Double {
-    return asGeoPointList().totalDistance()
 }

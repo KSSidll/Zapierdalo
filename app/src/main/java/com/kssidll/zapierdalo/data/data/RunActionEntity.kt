@@ -1,15 +1,21 @@
 package com.kssidll.zapierdalo.data.data
 
-import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import java.util.Calendar
 
-@Entity
+@Entity(
+    tableName = "RunActionEntity",
+    indices = [
+        Index(value = ["id"])
+    ]
+)
 data class RunActionEntity(
-    @PrimaryKey(autoGenerate = true) val id: Long,
-    @ColumnInfo val startTimestamp: Long,
-    @ColumnInfo val endTimestamp: Long?,
+    @PrimaryKey(autoGenerate = true)
+    val id: Long,
+    val startTimestamp: Long,
+    val endTimestamp: Long?,
 ) {
     constructor(
         startTimestamp: Long = Calendar.getInstance().timeInMillis,

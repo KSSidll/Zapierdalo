@@ -31,7 +31,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.kssidll.zapierdalo.DAY_IN_MILIS
 import com.kssidll.zapierdalo.ExpandedPreviews
@@ -67,7 +66,7 @@ fun DashboardRunsScreen(
                 count = runActionList.itemCount,
                 key = { index ->
                     when (val ephemeral = runActionList.peek(index)) {
-                        is RunActionElement.Element -> ephemeral.data.entity.id
+                        is RunActionElement.Element -> ephemeral.data.id
                         is RunActionElement.Separator -> Long.MIN_VALUE + index
                         null -> Long.MIN_VALUE + index
                     }
@@ -144,17 +143,15 @@ fun DashboardRunsScreen(
                                         .padding(horizontal = 20.dp)
                                 ) {
                                     val textStyle = Typography.labelLarge
-                                    val totalDistance =
-                                        runAction.totalDistance.collectAsStateWithLifecycle(0.0).value
 
                                     val distance =
-                                        if (totalDistance >= 1000.0) {
+                                        if (runAction.totalDistance >= 1000.0) {
                                             Pair(
-                                                "%.1f".format((totalDistance.toLong() / 100).toDouble() / 10),
+                                                "%.1f".format((runAction.totalDistance.toLong() / 100).toDouble() / 10),
                                                 "km"
                                             )
                                         } else {
-                                            Pair("${totalDistance.toLong()}", "m")
+                                            Pair("${runAction.totalDistance.toLong()}", "m")
                                         }
 
                                     var endTime by remember {
@@ -218,11 +215,9 @@ fun DashboardRunsScreen(
                                         .padding(horizontal = 20.dp)
                                 ) {
                                     val textStyle = Typography.labelLarge
-                                    val totalSteps =
-                                        runAction.totalSteps.collectAsStateWithLifecycle(0).value
 
                                     Text(
-                                        text = "$totalSteps steps",
+                                        text = "${runAction.totalSteps} steps",
                                         style = textStyle
                                     )
                                 }

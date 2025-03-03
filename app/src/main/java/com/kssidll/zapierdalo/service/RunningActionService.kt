@@ -30,6 +30,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
+import co.anbora.labs.spatia.geometry.Point
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
@@ -51,17 +52,16 @@ import com.kssidll.zapierdalo.data.data.StepsEntity
 import com.kssidll.zapierdalo.domain.usecase.gps.InsertGpsEntityUseCase
 import com.kssidll.zapierdalo.domain.usecase.runaction.GetRunActionEntityUseCase
 import com.kssidll.zapierdalo.domain.usecase.runaction.InsertRunActionEntityUseCase
-import com.kssidll.zapierdalo.domain.usecase.runaction.UpdateRunActionEntityUseCase
-import com.kssidll.zapierdalo.domain.usecase.steps.GetStepsEntityUseCase
+import com.kssidll.zapierdalo.domain.usecase.runaction.SetRunActionEndTimestampUseCase
 import com.kssidll.zapierdalo.domain.usecase.steps.InsertStepsEntityUseCase
-import com.kssidll.zapierdalo.domain.usecase.steps.UpdateStepsEntityUseCase
+import com.kssidll.zapierdalo.domain.usecase.steps.SetStepsCountUseCase
+import com.kssidll.zapierdalo.domain.usecase.steps.SetStepsEndTimestampUseCase
 import com.kssidll.zapierdalo.helper.checkPermission
 import com.kssidll.zapierdalo.helper.getLocalizedString
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.util.Calendar
 import javax.inject.Inject
@@ -157,16 +157,16 @@ class RunningActionService: Service(), SensorEventListener {
     lateinit var getRunActionEntityUseCase: GetRunActionEntityUseCase
 
     @Inject
-    lateinit var updateRunActionEntityUseCase: UpdateRunActionEntityUseCase
+    lateinit var setRunActionEndTimestampUseCase: SetRunActionEndTimestampUseCase
 
     @Inject
     lateinit var insertStepsEntityUseCase: InsertStepsEntityUseCase
 
     @Inject
-    lateinit var getStepsEntityUseCase: GetStepsEntityUseCase
+    lateinit var setStepsEndTimestampUseCase: SetStepsEndTimestampUseCase
 
     @Inject
-    lateinit var updateStepsEntityUseCase: UpdateStepsEntityUseCase
+    lateinit var setStepsCountUseCase: SetStepsCountUseCase
 
     private var runActionId: Long? = null
     private var stepsId: Long? = null
@@ -333,11 +333,9 @@ class RunningActionService: Service(), SensorEventListener {
 
                         val entity = GpsEntity(
                             runActionId = runActionId!!,
-                            latitude = location.latitude,
-                            longitude = location.longitude,
-                            altitude = location.altitude,
+                            location = Point(location.latitude, location.longitude),
                             accuracy = location.accuracy,
-                            speed = location.speed,
+                            speed = location.speed * 3.6f, // parse to kmh
                         )
 
                         insertGpsEntityUseCase(entity)
@@ -378,20 +376,11 @@ class RunningActionService: Service(), SensorEventListener {
         try {
             serviceScope.launch {
                 stepsId?.let { stepsId ->
-                    val stepsEntity = getStepsEntityUseCase(stepsId).first()!!.copy(
-                        endTimestamp = Calendar.getInstance().timeInMillis
-                    )
-
-                    updateStepsEntityUseCase(stepsEntity)
+                    setStepsEndTimestampUseCase(stepsId, Calendar.getInstance().timeInMillis)
                 }
 
                 runActionId?.let { runActionId ->
-                    val runActionEntity =
-                        getRunActionEntityUseCase(runActionId).first()!!.copy(
-                            endTimestamp = Calendar.getInstance().timeInMillis
-                        )
-
-                    updateRunActionEntityUseCase(runActionEntity)
+                    setRunActionEndTimestampUseCase(runActionId, Calendar.getInstance().timeInMillis)
                 }
             }.invokeOnCompletion {
                 fusedLocationClient.removeLocationUpdates(locationCallback!!)
@@ -547,11 +536,9 @@ class RunningActionService: Service(), SensorEventListener {
 
                             stepsStartCount = steps
                         } else {
-                            val entity = getStepsEntityUseCase(stepsId!!).first()!!.copy(
-                                steps = steps - stepsStartCount!!
-                            )
-
-                            updateStepsEntityUseCase(entity)
+                            stepsId?.let {
+                                setStepsCountUseCase(it, steps - stepsStartCount!!)
+                            }
                         }
                     }
                 }

@@ -6,10 +6,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.kssidll.zapierdalo.NavigationDestinations
-import com.kssidll.zapierdalo.domain.data.Data
 import com.kssidll.zapierdalo.domain.data.RunActionDetails
 import com.kssidll.zapierdalo.domain.usecase.runaction.DeleteRunActionEntityUseCase
-import com.kssidll.zapierdalo.domain.usecase.runaction.GetRunActionDetailsUseCase
+import com.kssidll.zapierdalo.domain.usecase.runactiondetails.GetRunActionDetailsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,7 +18,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class RunActionDetailsUiState(
-    val runActionDetails: Data<out RunActionDetails?> = Data.Loading()
+    val runActionDetails: RunActionDetails? = null
 )
 
 sealed class RunActionDetailsEvent {
@@ -56,14 +55,15 @@ class RunActionDetailsViewModel @Inject constructor(
     fun handleEvent(event: RunActionDetailsEvent) {
         when (event) {
             is RunActionDetailsEvent.NavigateBack -> {}
+
             is RunActionDetailsEvent.Delete -> deleteRunAction()
         }
     }
 
     private fun deleteRunAction() = viewModelScope.launch {
         val localState = uiState.value
-        localState.runActionDetails()?.let {
-            deleteRunActionEntityUseCase(it.entity)
+        localState.runActionDetails?.let {
+            deleteRunActionEntityUseCase(it.id)
         }
     }
 }

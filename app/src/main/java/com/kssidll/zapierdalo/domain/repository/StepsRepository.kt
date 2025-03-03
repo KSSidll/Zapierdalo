@@ -1,8 +1,6 @@
 package com.kssidll.zapierdalo.domain.repository
 
-import com.kssidll.zapierdalo.data.data.RunActionEntity
 import com.kssidll.zapierdalo.data.data.StepsEntity
-import kotlinx.coroutines.flow.Flow
 
 interface StepsRepository {
 
@@ -16,29 +14,17 @@ interface StepsRepository {
     // Update
 
     /**
-     * Update [StepsEntity] object in the database
-     * Matches by id
+     * Set end timestamp of entity matching id = [entityId] to [endTimestamp]
      */
-    suspend fun update(entity: StepsEntity)
+    suspend fun setEndTimestamp(entityId: Long, endTimestamp: Long?)
+
+    /**
+     * Set steps count of entity matching id = [entityId] to [count]
+     */
+    suspend fun setStepsCount(entityId: Long, count: Long)
 
     // Delete
 
     // Read
 
-    /**
-     * Returns a flow of [StepsEntity] matching [id]
-     * @param id Id of the [StepsEntity] to match with
-     */
-    fun get(id: Long): Flow<StepsEntity?>
-
-    /**
-     * Returns a flow of all [StepsEntity] objects matching [runActionId]
-     * @param runActionId Id of the [RunActionEntity] to match the [StepsEntity] object with
-     */
-    fun byRunActionId(runActionId: Long): Flow<List<StepsEntity>>
-
-    /**
-     * Returns a flow of all [StepsEntity] objects
-     */
-    fun all(): Flow<List<StepsEntity>>
 }

@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "842c4e541355deb0a472b54d8ca675a3",
+    "identityHash": "82e702b782c005fa53a0f3b07ea9e4ef",
     "entities": [
       {
         "tableName": "RunActionEntity",
@@ -33,12 +33,22 @@
             "id"
           ]
         },
-        "indices": [],
+        "indices": [
+          {
+            "name": "index_RunActionEntity_id",
+            "unique": false,
+            "columnNames": [
+              "id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_RunActionEntity_id` ON `${TABLE_NAME}` (`id`)"
+          }
+        ],
         "foreignKeys": []
       },
       {
         "tableName": "GpsEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `runActionId` INTEGER NOT NULL, `timestamp` INTEGER NOT NULL, `latitude` REAL NOT NULL, `longitude` REAL NOT NULL, `altitude` REAL NOT NULL, `accuracy` REAL NOT NULL, `speed` REAL NOT NULL, FOREIGN KEY(`runActionId`) REFERENCES `RunActionEntity`(`id`) ON UPDATE CASCADE ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `runActionId` INTEGER NOT NULL, `location` BLOB NOT NULL, `accuracy` REAL NOT NULL, `speed` REAL NOT NULL, `timestamp` INTEGER NOT NULL, FOREIGN KEY(`runActionId`) REFERENCES `RunActionEntity`(`id`) ON UPDATE CASCADE ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
@@ -53,27 +63,9 @@
             "notNull": true
           },
           {
-            "fieldPath": "timestamp",
-            "columnName": "timestamp",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "latitude",
-            "columnName": "latitude",
-            "affinity": "REAL",
-            "notNull": true
-          },
-          {
-            "fieldPath": "longitude",
-            "columnName": "longitude",
-            "affinity": "REAL",
-            "notNull": true
-          },
-          {
-            "fieldPath": "altitude",
-            "columnName": "altitude",
-            "affinity": "REAL",
+            "fieldPath": "location",
+            "columnName": "location",
+            "affinity": "BLOB",
             "notNull": true
           },
           {
@@ -86,6 +78,12 @@
             "fieldPath": "speed",
             "columnName": "speed",
             "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timestamp",
+            "columnName": "timestamp",
+            "affinity": "INTEGER",
             "notNull": true
           }
         ],
@@ -104,6 +102,16 @@
             ],
             "orders": [],
             "createSql": "CREATE INDEX IF NOT EXISTS `index_GpsEntity_runActionId` ON `${TABLE_NAME}` (`runActionId`)"
+          },
+          {
+            "name": "index_GpsEntity_runActionId_id",
+            "unique": false,
+            "columnNames": [
+              "runActionId",
+              "id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_GpsEntity_runActionId_id` ON `${TABLE_NAME}` (`runActionId`, `id`)"
           }
         ],
         "foreignKeys": [
@@ -187,10 +195,27 @@
         ]
       }
     ],
-    "views": [],
+    "views": [
+      {
+        "viewName": "Gps",
+        "createSql": "CREATE VIEW `${VIEW_NAME}` AS SELECT\n            ge.runActionId,\n            ge.location\n        FROM GpsEntity ge"
+      },
+      {
+        "viewName": "GpsDistance",
+        "createSql": "CREATE VIEW `${VIEW_NAME}` AS SELECT \n            g1.runActionId, \n            SUM(\n                ST_DISTANCE(g1.location, g2.location)\n            ) AS totalDistance\n        FROM \n            GpsEntity g1\n        JOIN \n            GpsEntity g2 ON g1.runActionId = g2.runActionId \n                AND g1.id = (\n                    SELECT MAX(g3.id) \n                    FROM GpsEntity g3 \n                    WHERE g3.id < g2.id AND g3.runActionId = g2.runActionId\n                )\n        GROUP BY \n            g1.runActionId"
+      },
+      {
+        "viewName": "StepsAmount",
+        "createSql": "CREATE VIEW `${VIEW_NAME}` AS SELECT\n            runActionId,\n            SUM(steps) as totalSteps\n        FROM StepsEntity\n        GROUP BY runActionId"
+      },
+      {
+        "viewName": "RunAction",
+        "createSql": "CREATE VIEW `${VIEW_NAME}` AS SELECT\n            rae.id,\n            gd.totalDistance,\n            sa.totalSteps,\n            rae.startTimestamp,\n            rae.endTimestamp\n        FROM RunActionEntity rae\n        LEFT JOIN GpsDistance gd ON gd.runActionId = rae.id\n        LEFT JOIN StepsAmount sa ON sa.runActionId = rae.id"
+      }
+    ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '842c4e541355deb0a472b54d8ca675a3')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '82e702b782c005fa53a0f3b07ea9e4ef')"
     ]
   }
 }

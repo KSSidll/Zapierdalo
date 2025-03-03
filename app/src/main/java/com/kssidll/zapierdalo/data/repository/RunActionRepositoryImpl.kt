@@ -3,6 +3,7 @@ package com.kssidll.zapierdalo.data.repository
 import androidx.paging.PagingSource
 import com.kssidll.zapierdalo.data.dao.RunActionDao
 import com.kssidll.zapierdalo.data.data.RunActionEntity
+import com.kssidll.zapierdalo.data.data.view.RunAction
 import com.kssidll.zapierdalo.domain.repository.RunActionRepository
 import kotlinx.coroutines.flow.Flow
 
@@ -16,8 +17,8 @@ class RunActionRepositoryImpl(private val dao: RunActionDao): RunActionRepositor
 
     // Update
 
-    override suspend fun update(entity: RunActionEntity) {
-        dao.update(entity)
+    override suspend fun setEndTimestamp(entityId: Long, endTimestamp: Long?) {
+        dao.setEndTimestamp(entityId, endTimestamp)
     }
 
     // Delete
@@ -26,21 +27,21 @@ class RunActionRepositoryImpl(private val dao: RunActionDao): RunActionRepositor
         dao.delete(entity)
     }
 
+    override suspend fun delete(entityId: Long) {
+        dao.delete(entityId)
+    }
+
     // Read
 
-    override fun get(id: Long): Flow<RunActionEntity?> {
+    override fun get(id: Long): Flow<RunAction?> {
         return dao.get(id)
     }
 
-    override fun all(): Flow<List<RunActionEntity>> {
-        return dao.all()
-    }
-
-    override fun allPaged(): PagingSource<Int, RunActionEntity> {
+    override fun allPaged(): PagingSource<Int, RunAction> {
         return dao.allPaged()
     }
 
-    override fun latest(): Flow<RunActionEntity?> {
+    override fun latest(): Flow<RunAction?> {
         return dao.latest()
     }
 }

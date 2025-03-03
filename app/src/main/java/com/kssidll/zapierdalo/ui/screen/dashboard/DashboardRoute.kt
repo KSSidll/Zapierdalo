@@ -6,7 +6,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.kssidll.zapierdalo.domain.data.toEntity
 import com.kssidll.zapierdalo.service.rememberRunningActionServicePreparationLauncher
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -32,7 +31,7 @@ fun DashboardRoute(
                 }
 
                 is DashboardEvent.NavigateRunActionDetails -> {
-                    navigateRunActionDetails(event.runAction.toEntity().id)
+                    navigateRunActionDetails(event.runAction.id)
                 }
 
                 is DashboardEvent.StartRunningAction -> {

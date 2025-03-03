@@ -21,8 +21,8 @@ android {
         applicationId = appNamespace
         minSdk = 24
         targetSdk = 35
-        versionCode = 3
-        versionName = "1.0.2"
+        versionCode = 1
+        versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -40,8 +40,7 @@ android {
             isShrinkResources = true
 
             proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
             )
 
             signingConfig = signingConfigs.getByName("debug")
@@ -117,6 +116,9 @@ dependencies {
     ksp(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.paging)
+
+    // Spatia Room
+    implementation(libs.dev.anboralabs.room.spatia)
 
     // Helpers
     implementation(libs.google.accompanist)

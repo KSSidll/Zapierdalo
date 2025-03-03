@@ -3,8 +3,6 @@ package com.kssidll.zapierdalo.data.repository
 import com.kssidll.zapierdalo.data.dao.GpsDao
 import com.kssidll.zapierdalo.data.data.GpsEntity
 import com.kssidll.zapierdalo.domain.repository.GpsRepository
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 
 class GpsRepositoryImpl(private val dao: GpsDao): GpsRepository {
 
@@ -18,14 +16,4 @@ class GpsRepositoryImpl(private val dao: GpsDao): GpsRepository {
 
     // Read
 
-    override fun byRunActionId(runActionId: Long): Flow<List<GpsEntity>> {
-        return dao.byRunActionId(runActionId)
-            .map { list ->
-                list.filter { it.accuracy < 8f }
-            }
-    }
-
-    override fun all(): Flow<List<GpsEntity>> {
-        return dao.all()
-    }
 }

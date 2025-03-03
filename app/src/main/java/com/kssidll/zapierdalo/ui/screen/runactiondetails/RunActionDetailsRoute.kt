@@ -16,6 +16,7 @@ fun RunActionDetailsRoute(
         onEvent = { event ->
             when (event) {
                 is RunActionDetailsEvent.NavigateBack -> navigateBack()
+
                 is RunActionDetailsEvent.Delete -> {
                     viewModel.handleEvent(event)
                     navigateBack()

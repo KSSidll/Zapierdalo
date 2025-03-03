@@ -1,7 +1,6 @@
 package com.kssidll.zapierdalo.di.module.usecase
 
 import com.kssidll.zapierdalo.domain.repository.GpsRepository
-import com.kssidll.zapierdalo.domain.usecase.gps.GetGpsEntityByRunActionUseCase
 import com.kssidll.zapierdalo.domain.usecase.gps.InsertGpsEntityUseCase
 import dagger.Module
 import dagger.Provides
@@ -18,13 +17,5 @@ class GpsUseCaseModule {
         gpsRepository: GpsRepository
     ): InsertGpsEntityUseCase {
         return InsertGpsEntityUseCase(gpsRepository)
-    }
-
-    @Provides
-    @ViewModelScoped
-    fun provideGetGpsEntityByRunActionUseCase(
-        gpsRepository: GpsRepository,
-    ): GetGpsEntityByRunActionUseCase {
-        return GetGpsEntityByRunActionUseCase(gpsRepository)
     }
 }

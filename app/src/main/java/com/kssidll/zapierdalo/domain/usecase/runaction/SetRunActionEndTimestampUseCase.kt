@@ -1,19 +1,19 @@
 package com.kssidll.zapierdalo.domain.usecase.runaction
 
-import com.kssidll.zapierdalo.data.data.RunActionEntity
 import com.kssidll.zapierdalo.domain.repository.RunActionRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
-class UpdateRunActionEntityUseCase @Inject constructor(
+class SetRunActionEndTimestampUseCase @Inject constructor(
     private val runActionRepository: RunActionRepository,
 ) {
     suspend operator fun invoke(
-        entity: RunActionEntity,
+        entityId: Long,
+        endTimestamp: Long?,
         dispatcher: CoroutineContext = Dispatchers.IO
     ) = withContext(dispatcher) {
-        runActionRepository.update(entity)
+        runActionRepository.setEndTimestamp(entityId, endTimestamp)
     }
 }

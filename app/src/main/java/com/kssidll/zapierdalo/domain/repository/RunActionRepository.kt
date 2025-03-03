@@ -1,8 +1,8 @@
 package com.kssidll.zapierdalo.domain.repository
 
 import androidx.paging.PagingSource
-import com.kssidll.zapierdalo.data.data.GpsEntity
 import com.kssidll.zapierdalo.data.data.RunActionEntity
+import com.kssidll.zapierdalo.data.data.view.RunAction
 import kotlinx.coroutines.flow.Flow
 
 interface RunActionRepository {
@@ -10,17 +10,16 @@ interface RunActionRepository {
     // Create
 
     /**
-     * Inserts [GpsEntity] object into the database
+     * Inserts [RunActionEntity] object into the database
      */
     suspend fun insert(entity: RunActionEntity): Long
 
     // Update
 
     /**
-     * Update [RunActionEntity] object in the database
-     * Matches by id
+     * Set end timestamp of entity matching id = [entityId] to [endTimestamp]
      */
-    suspend fun update(entity: RunActionEntity)
+    suspend fun setEndTimestamp(entityId: Long, endTimestamp: Long?)
 
     // Delete
 
@@ -30,26 +29,27 @@ interface RunActionRepository {
      */
     suspend fun delete(entity: RunActionEntity)
 
+    /**
+     * Delete [RunActionEntity] object from the database
+     * Matches by id
+     */
+    suspend fun delete(entityId: Long)
+
     // Read
 
     /**
-     * Returns a flow of [RunActionEntity] object matching [id]
+     * Returns a flow of [RunAction] object matching [id]
      * @param id Id of the object to match with
      */
-    fun get(id: Long): Flow<RunActionEntity?>
+    fun get(id: Long): Flow<RunAction?>
 
     /**
-     * Returns a flow of all [RunActionEntity] objects
+     * Returns [PagingSource] of [RunAction] objects
      */
-    fun all(): Flow<List<RunActionEntity>>
+    fun allPaged(): PagingSource<Int, RunAction>
 
     /**
-     * Returns [PagingSource] of [RunActionEntity] objects
+     * Returns a flow of latest [RunAction] object
      */
-    fun allPaged(): PagingSource<Int, RunActionEntity>
-
-    /**
-     * Returns a flow of latest [RunActionEntity] object
-     */
-    fun latest(): Flow<RunActionEntity?>
+    fun latest(): Flow<RunAction?>
 }

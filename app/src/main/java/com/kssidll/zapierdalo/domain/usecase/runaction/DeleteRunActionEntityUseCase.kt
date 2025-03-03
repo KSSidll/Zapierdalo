@@ -16,4 +16,11 @@ class DeleteRunActionEntityUseCase @Inject constructor(
     ) = withContext(dispatcher) {
         runActionRepository.delete(entity)
     }
+
+    suspend operator fun invoke(
+        entityId: Long,
+        dispatcher: CoroutineContext = Dispatchers.IO
+    ) = withContext(dispatcher) {
+        runActionRepository.delete(entityId)
+    }
 }

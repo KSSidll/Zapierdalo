@@ -12,7 +12,7 @@ import androidx.paging.cachedIn
 import androidx.paging.insertSeparators
 import androidx.paging.map
 import com.kssidll.zapierdalo.DAY_IN_MILIS
-import com.kssidll.zapierdalo.domain.data.RunAction
+import com.kssidll.zapierdalo.data.data.view.RunAction
 import com.kssidll.zapierdalo.domain.usecase.StartRunningActionServiceUseCase
 import com.kssidll.zapierdalo.domain.usecase.StopRunningActionServiceUseCase
 import com.kssidll.zapierdalo.domain.usecase.runaction.GetAllPagedRunActionUseCase

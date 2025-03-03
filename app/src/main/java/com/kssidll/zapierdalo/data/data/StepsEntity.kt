@@ -1,10 +1,10 @@
 package com.kssidll.zapierdalo.data.data
 
 import androidx.compose.ui.util.fastSumBy
-import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Ignore
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import java.util.Calendar
 
@@ -17,14 +17,19 @@ import java.util.Calendar
             onDelete = ForeignKey.CASCADE,
             onUpdate = ForeignKey.CASCADE
         )
-    ]
+    ],
+    indices = [
+        Index(value = ["runActionId"])
+    ],
+    tableName = "StepsEntity"
 )
 data class StepsEntity(
-    @PrimaryKey(autoGenerate = true) val id: Long,
-    @ColumnInfo(index = true) val runActionId: Long,
-    @ColumnInfo val startTimestamp: Long,
-    @ColumnInfo val endTimestamp: Long?,
-    @ColumnInfo val steps: Long,
+    @PrimaryKey(autoGenerate = true)
+    val id: Long,
+    val runActionId: Long,
+    val startTimestamp: Long,
+    val endTimestamp: Long?,
+    val steps: Long,
 ) {
     @Ignore
     constructor(
