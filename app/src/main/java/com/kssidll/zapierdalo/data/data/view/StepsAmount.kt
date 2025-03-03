@@ -2,7 +2,6 @@ package com.kssidll.zapierdalo.data.data.view;
 
 import androidx.room.DatabaseView
 
-@Suppress("AndroidUnresolvedRoomSqlReference")
 @DatabaseView(
     """
         SELECT
