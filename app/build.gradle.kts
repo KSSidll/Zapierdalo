@@ -15,7 +15,7 @@ android {
     val appNamespace = "com.kssidll.zapierdalo"
 
     namespace = appNamespace
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = appNamespace
