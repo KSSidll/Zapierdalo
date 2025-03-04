@@ -5,7 +5,6 @@ import androidx.room.ForeignKey
 import androidx.room.Ignore
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import co.anbora.labs.spatia.geometry.Point
 import java.util.Calendar
 
 @Entity(
@@ -28,7 +27,9 @@ data class GpsEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long,
     val runActionId: Long,
-    val location: Point,
+    val latitude: Double,
+    val longitude: Double,
+    val altitude: Double,
     val accuracy: Float,
     val speed: Float, // in kmh
     val timestamp: Long,
@@ -36,14 +37,18 @@ data class GpsEntity(
     @Ignore
     constructor(
         runActionId: Long,
-        location: Point,
+        latitude: Double,
+        longitude: Double,
+        altitude: Double,
         accuracy: Float,
         speed: Float, // in kmh
         timestamp: Long = Calendar.getInstance().timeInMillis,
     ): this(
         id = 0,
         runActionId = runActionId,
-        location = location,
+        latitude = latitude,
+        longitude = longitude,
+        altitude = altitude,
         accuracy = accuracy,
         speed = speed,
         timestamp = timestamp,

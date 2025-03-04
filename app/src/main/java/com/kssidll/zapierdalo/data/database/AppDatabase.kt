@@ -2,11 +2,9 @@ package com.kssidll.zapierdalo.data.database
 
 import android.content.Context
 import androidx.room.Database
+import androidx.room.Room
 import androidx.room.RoomDatabase
-import androidx.room.TypeConverters
 import androidx.sqlite.db.SupportSQLiteDatabase
-import co.anbora.labs.spatia.builder.SpatiaRoom
-import co.anbora.labs.spatia.geometry.GeometryConverters
 import com.kssidll.zapierdalo.APPLICATION_NAME
 import com.kssidll.zapierdalo.data.dao.GpsDao
 import com.kssidll.zapierdalo.data.dao.RunActionDao
@@ -39,9 +37,6 @@ const val DATABASE_NAME: String = APPLICATION_NAME + "_database.db"
         StepsAmount::class,
     ]
 )
-@TypeConverters(
-    GeometryConverters::class
-)
 abstract class AppDatabase: RoomDatabase() {
     abstract fun runActionDetailsDao(): RunActionDetailsDao
     abstract fun runActionDao(): RunActionDao
@@ -57,21 +52,12 @@ abstract class AppDatabase: RoomDatabase() {
         private fun builder(
             context: Context,
             name: String
-        ): SpatiaRoom.Builder<AppDatabase> {
-            return SpatiaRoom.databaseBuilder(
+        ): Builder<AppDatabase> {
+            return Room.databaseBuilder(
                 context.applicationContext,
                 AppDatabase::class.java,
                 name
-            ).addCallback(object: Callback() {
-                override fun onCreate(db: SupportSQLiteDatabase) {
-                    // Initialize Spatialite
-                    db.query("SELECT InitSpatialMetaData();").moveToNext()
-                    // Room already creates a BLOB column for the geometry, so we need to use
-                    // RecoverGeometryColumn to correctly initialize Spatialite's metadata
-                    db.query("SELECT RecoverGeometryColumn('geo_posts', 'location', 4326, 'POINT', 'XY');")
-                        .moveToNext()
-                }
-            })
+            )
         }
 
         /**

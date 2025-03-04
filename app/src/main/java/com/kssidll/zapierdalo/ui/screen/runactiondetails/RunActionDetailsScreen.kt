@@ -25,8 +25,6 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.viewinterop.AndroidView
 import com.kssidll.zapierdalo.R
-import com.kssidll.zapierdalo.domain.data.lastGeoPoint
-import com.kssidll.zapierdalo.domain.data.toGeoPointList
 import com.kssidll.zapierdalo.helper.orPointZero
 import com.kssidll.zapierdalo.ui.component.SecondaryAppBar
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
@@ -63,23 +61,23 @@ fun RunActionDetailsScreen(
                     mapViewInitialZoomSet = true
                 }
 
-                mapView.controller.setCenter(gpsPoints.lastGeoPoint().orPointZero())
+                mapView.controller.setCenter(gpsPoints.lastOrNull().orPointZero())
 
                 if (mapViewPolyline == null || !mapView.overlayManager.contains(mapViewPolyline)) {
                     mapViewPolyline = Polyline().apply {
                         outlinePaint.color = mapViewPolylineColor.toArgb()
-                        setPoints(gpsPoints.toGeoPointList())
+                        setPoints(gpsPoints)
                     }
                     mapView.overlayManager.add(mapViewPolyline)
                 } else {
-                    mapViewPolyline?.setPoints(gpsPoints.toGeoPointList())
+                    mapViewPolyline?.setPoints(gpsPoints)
                 }
 
                 if (sfpo != null) {
                     mapView.overlayManager.remove(sfpo)
                 }
 
-                val pt = SimplePointTheme(gpsPoints.toGeoPointList())
+                val pt = SimplePointTheme(gpsPoints)
                 val opt = SimpleFastPointOverlayOptions.getDefaultStyle()
                     .setAlgorithm(SimpleFastPointOverlayOptions.RenderingAlgorithm.MEDIUM_OPTIMIZATION)
                     .setRadius(5f)

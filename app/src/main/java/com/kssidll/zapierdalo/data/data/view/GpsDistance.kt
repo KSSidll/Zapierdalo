@@ -1,15 +1,231 @@
 package com.kssidll.zapierdalo.data.data.view
 
 import androidx.room.DatabaseView
-import androidx.room.SkipQueryVerification
 
-@SkipQueryVerification
+// an ungodly distance between points calculation based on sqrt estimation
+// coz there's no sqrt function available
 @DatabaseView(
     """
         SELECT 
             g1.runActionId, 
             SUM(
-                ST_DISTANCE(g1.location, g2.location)
+                0.5 * (
+                  (0.5 * (
+                    (0.5 * (
+                      (0.5 * (
+                        (0.5 * (
+                          1 + (
+                            ((g1.longitude - g2.longitude) * (g1.longitude - g2.longitude))
+                            + ((g1.latitude - g2.latitude) * (g1.latitude - g2.latitude))
+                            + ((g1.altitude - g2.altitude) * (g1.altitude - g2.altitude))
+                          )
+                        )) + (
+                          (
+                            ((g1.longitude - g2.longitude) * (g1.longitude - g2.longitude))
+                            + ((g1.latitude - g2.latitude) * (g1.latitude - g2.latitude))
+                            + ((g1.altitude - g2.altitude) * (g1.altitude - g2.altitude))
+                          ) / (0.5 * (
+                            1 + (
+                              ((g1.longitude - g2.longitude) * (g1.longitude - g2.longitude))
+                              + ((g1.latitude - g2.latitude) * (g1.latitude - g2.latitude))
+                              + ((g1.altitude - g2.altitude) * (g1.altitude - g2.altitude))
+                          )
+                          ))
+                        )
+                      )) + (
+                        (
+                          ((g1.longitude - g2.longitude) * (g1.longitude - g2.longitude))
+                          + ((g1.latitude - g2.latitude) * (g1.latitude - g2.latitude))
+                          + ((g1.altitude - g2.altitude) * (g1.altitude - g2.altitude))
+                        ) / (0.5 * (
+                          (0.5 * (
+                            1 + (
+                              ((g1.longitude - g2.longitude) * (g1.longitude - g2.longitude))
+                              + ((g1.latitude - g2.latitude) * (g1.latitude - g2.latitude))
+                              + ((g1.altitude - g2.altitude) * (g1.altitude - g2.altitude))
+                            )
+                          )) + (
+                            (
+                              ((g1.longitude - g2.longitude) * (g1.longitude - g2.longitude))
+                              + ((g1.latitude - g2.latitude) * (g1.latitude - g2.latitude))
+                              + ((g1.altitude - g2.altitude) * (g1.altitude - g2.altitude))
+                            ) / (0.5 * (
+                              1 + (
+                                ((g1.longitude - g2.longitude) * (g1.longitude - g2.longitude))
+                                + ((g1.latitude - g2.latitude) * (g1.latitude - g2.latitude))
+                                + ((g1.altitude - g2.altitude) * (g1.altitude - g2.altitude))
+                              )
+                            ))
+                          )
+                        ))
+                      )
+                    )) + (
+                      (
+                        ((g1.longitude - g2.longitude) * (g1.longitude - g2.longitude))
+                        + ((g1.latitude - g2.latitude) * (g1.latitude - g2.latitude))
+                        + ((g1.altitude - g2.altitude) * (g1.altitude - g2.altitude))
+                      ) / (0.5 * (
+                        (0.5 * (
+                          (0.5 * (
+                            1 + (
+                              ((g1.longitude - g2.longitude) * (g1.longitude - g2.longitude))
+                              + ((g1.latitude - g2.latitude) * (g1.latitude - g2.latitude))
+                              + ((g1.altitude - g2.altitude) * (g1.altitude - g2.altitude))
+                            )
+                          )) + (
+                            (
+                              ((g1.longitude - g2.longitude) * (g1.longitude - g2.longitude))
+                              + ((g1.latitude - g2.latitude) * (g1.latitude - g2.latitude))
+                              + ((g1.altitude - g2.altitude) * (g1.altitude - g2.altitude))
+                            ) / (0.5 * (
+                              1 + (
+                                ((g1.longitude - g2.longitude) * (g1.longitude - g2.longitude))
+                                + ((g1.latitude - g2.latitude) * (g1.latitude - g2.latitude))
+                                + ((g1.altitude - g2.altitude) * (g1.altitude - g2.altitude))
+                              )
+                            ))
+                          )
+                        )) + (
+                          (
+                            ((g1.longitude - g2.longitude) * (g1.longitude - g2.longitude))
+                            + ((g1.latitude - g2.latitude) * (g1.latitude - g2.latitude))
+                            + ((g1.altitude - g2.altitude) * (g1.altitude - g2.altitude))
+                          ) / (0.5 * (
+                            (0.5 * (
+                              1 + (
+                                ((g1.longitude - g2.longitude) * (g1.longitude - g2.longitude))
+                                + ((g1.latitude - g2.latitude) * (g1.latitude - g2.latitude))
+                                + ((g1.altitude - g2.altitude) * (g1.altitude - g2.altitude))
+                              )
+                            )) + (
+                              (
+                                ((g1.longitude - g2.longitude) * (g1.longitude - g2.longitude))
+                                + ((g1.latitude - g2.latitude) * (g1.latitude - g2.latitude))
+                                + ((g1.altitude - g2.altitude) * (g1.altitude - g2.altitude))
+                              ) / (0.5 * (
+                                1 + (
+                                  ((g1.longitude - g2.longitude) * (g1.longitude - g2.longitude))
+                                  + ((g1.latitude - g2.latitude) * (g1.latitude - g2.latitude))
+                                  + ((g1.altitude - g2.altitude) * (g1.altitude - g2.altitude))
+                                )
+                              ))
+                            )
+                          ))
+                        )
+                      ))
+                    )
+                  )) + (
+                    (
+                      ((g1.longitude - g2.longitude) * (g1.longitude - g2.longitude))
+                      + ((g1.latitude - g2.latitude) * (g1.latitude - g2.latitude))
+                      + ((g1.altitude - g2.altitude) * (g1.altitude - g2.altitude))
+                    ) / (0.5 * (
+                      (0.5 * (
+                        (0.5 * (
+                          (0.5 * (
+                            1 + (
+                              ((g1.longitude - g2.longitude) * (g1.longitude - g2.longitude))
+                              + ((g1.latitude - g2.latitude) * (g1.latitude - g2.latitude))
+                              + ((g1.altitude - g2.altitude) * (g1.altitude - g2.altitude))
+                            )
+                          )) + (
+                            (
+                              ((g1.longitude - g2.longitude) * (g1.longitude - g2.longitude))
+                              + ((g1.latitude - g2.latitude) * (g1.latitude - g2.latitude))
+                              + ((g1.altitude - g2.altitude) * (g1.altitude - g2.altitude))
+                            ) / (0.5 * (
+                              1 + (
+                                ((g1.longitude - g2.longitude) * (g1.longitude - g2.longitude))
+                                + ((g1.latitude - g2.latitude) * (g1.latitude - g2.latitude))
+                                + ((g1.altitude - g2.altitude) * (g1.altitude - g2.altitude))
+                              )
+                            ))
+                          )
+                        )) + (
+                          (
+                            ((g1.longitude - g2.longitude) * (g1.longitude - g2.longitude))
+                            + ((g1.latitude - g2.latitude) * (g1.latitude - g2.latitude))
+                            + ((g1.altitude - g2.altitude) * (g1.altitude - g2.altitude))
+                          ) / (0.5 * (
+                            (0.5 * (
+                              1 + (
+                                ((g1.longitude - g2.longitude) * (g1.longitude - g2.longitude))
+                                + ((g1.latitude - g2.latitude) * (g1.latitude - g2.latitude))
+                                + ((g1.altitude - g2.altitude) * (g1.altitude - g2.altitude))
+                              )
+                            )) + (
+                              (
+                                ((g1.longitude - g2.longitude) * (g1.longitude - g2.longitude))
+                                + ((g1.latitude - g2.latitude) * (g1.latitude - g2.latitude))
+                                + ((g1.altitude - g2.altitude) * (g1.altitude - g2.altitude))
+                            ) / (0.5 * (
+                                1 + (
+                                  ((g1.longitude - g2.longitude) * (g1.longitude - g2.longitude))
+                                  + ((g1.latitude - g2.latitude) * (g1.latitude - g2.latitude))
+                                  + ((g1.altitude - g2.altitude) * (g1.altitude - g2.altitude))
+                                )
+                              ))
+                            )
+                          ))
+                        )
+                      )) + (
+                        (
+                          ((g1.longitude - g2.longitude) * (g1.longitude - g2.longitude))
+                          + ((g1.latitude - g2.latitude) * (g1.latitude - g2.latitude))
+                          + ((g1.altitude - g2.altitude) * (g1.altitude - g2.altitude))
+                        ) / (0.5 * (
+                          (0.5 * (
+                            (0.5 * (
+                              1 + (
+                                ((g1.longitude - g2.longitude) * (g1.longitude - g2.longitude))
+                                + ((g1.latitude - g2.latitude) * (g1.latitude - g2.latitude))
+                                + ((g1.altitude - g2.altitude) * (g1.altitude - g2.altitude))
+                              )
+                            )) + (
+                              (
+                                ((g1.longitude - g2.longitude) * (g1.longitude - g2.longitude))
+                                + ((g1.latitude - g2.latitude) * (g1.latitude - g2.latitude))
+                                + ((g1.altitude - g2.altitude) * (g1.altitude - g2.altitude))
+                              ) / (0.5 * (
+                                1 + (
+                                  ((g1.longitude - g2.longitude) * (g1.longitude - g2.longitude))
+                                  + ((g1.latitude - g2.latitude) * (g1.latitude - g2.latitude))
+                                  + ((g1.altitude - g2.altitude) * (g1.altitude - g2.altitude))
+                                )
+                              ))
+                            )
+                          )) + (
+                            (
+                              ((g1.longitude - g2.longitude) * (g1.longitude - g2.longitude))
+                              + ((g1.latitude - g2.latitude) * (g1.latitude - g2.latitude))
+                              + ((g1.altitude - g2.altitude) * (g1.altitude - g2.altitude))
+                            ) / (0.5 * (
+                              (0.5 * (
+                                1 + (
+                                  ((g1.longitude - g2.longitude) * (g1.longitude - g2.longitude))
+                                  + ((g1.latitude - g2.latitude) * (g1.latitude - g2.latitude))
+                                  + ((g1.altitude - g2.altitude) * (g1.altitude - g2.altitude))
+                                )
+                              )) + (
+                                (
+                                  ((g1.longitude - g2.longitude) * (g1.longitude - g2.longitude))
+                                  + ((g1.latitude - g2.latitude) * (g1.latitude - g2.latitude))
+                                  + ((g1.altitude - g2.altitude) * (g1.altitude - g2.altitude))
+                                ) / (0.5 * (
+                                  1 + (
+                                    ((g1.longitude - g2.longitude) * (g1.longitude - g2.longitude))
+                                    + ((g1.latitude - g2.latitude) * (g1.latitude - g2.latitude))
+                                    + ((g1.altitude - g2.altitude) * (g1.altitude - g2.altitude))
+                                  )
+                                ))
+                              )
+                            ))
+                          )
+                        ))
+                      )
+                    ))
+                  )
+                )
             ) AS totalDistance
         FROM 
             GpsEntity g1
