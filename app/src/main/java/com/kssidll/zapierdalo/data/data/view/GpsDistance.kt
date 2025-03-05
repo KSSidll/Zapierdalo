@@ -6,22 +6,21 @@ import androidx.room.SkipQueryVerification
 @SkipQueryVerification
 @DatabaseView(
     """
+        -- build a simplified linestring from all gps per run action and calculate length in meters
         SELECT 
-            g1.runActionId, 
-            SUM(
-                ST_DISTANCE(g1.location, g2.location)
-            ) AS totalDistance
-        FROM 
-            GpsEntity g1
-        JOIN 
-            GpsEntity g2 ON g1.runActionId = g2.runActionId 
-                AND g1.id = (
-                    SELECT MAX(g3.id) 
-                    FROM GpsEntity g3 
-                    WHERE g3.id < g2.id AND g3.runActionId = g2.runActionId
+            runActionId, 
+            ST_Length(
+                ST_Simplify(
+                    ST_LineFromText(
+                        'LINESTRING(' || GROUP_CONCAT(ST_X(location) || ' ' || ST_Y(location), ',') || ')',
+                        ST_SRID(location)
+                    ),
+                    5 -- 5 meters tolerance for simplification
                 )
-        GROUP BY 
-            g1.runActionId
+            ) AS totalDistance
+        FROM GpsEntity
+        GROUP BY runActionId
+        ORDER BY id ASC
     """,
     viewName = "GpsDistance"
 )

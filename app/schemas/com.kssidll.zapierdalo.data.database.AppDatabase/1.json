@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "82e702b782c005fa53a0f3b07ea9e4ef",
+    "identityHash": "dd332f1600b404a292d55084464f19fb",
     "entities": [
       {
         "tableName": "RunActionEntity",
@@ -202,7 +202,7 @@
       },
       {
         "viewName": "GpsDistance",
-        "createSql": "CREATE VIEW `${VIEW_NAME}` AS SELECT \n            g1.runActionId, \n            SUM(\n                ST_DISTANCE(g1.location, g2.location)\n            ) AS totalDistance\n        FROM \n            GpsEntity g1\n        JOIN \n            GpsEntity g2 ON g1.runActionId = g2.runActionId \n                AND g1.id = (\n                    SELECT MAX(g3.id) \n                    FROM GpsEntity g3 \n                    WHERE g3.id < g2.id AND g3.runActionId = g2.runActionId\n                )\n        GROUP BY \n            g1.runActionId"
+        "createSql": "CREATE VIEW `${VIEW_NAME}` AS -- build a simplified linestring from all gps per run action and calculate length in meters\n        SELECT \n            runActionId, \n            ST_Length(\n                ST_Simplify(\n                    ST_LineFromText(\n                        'LINESTRING(' || GROUP_CONCAT(ST_X(location) || ' ' || ST_Y(location), ',') || ')',\n                        ST_SRID(location)\n                    ),\n                    5 -- 5 meters tolerance for simplification\n                )\n            ) AS totalDistance\n        FROM GpsEntity\n        GROUP BY runActionId\n        ORDER BY id ASC"
       },
       {
         "viewName": "StepsAmount",
@@ -215,7 +215,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '82e702b782c005fa53a0f3b07ea9e4ef')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'dd332f1600b404a292d55084464f19fb')"
     ]
   }
 }
