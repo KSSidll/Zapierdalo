@@ -1,6 +1,6 @@
 package com.kssidll.zapierdalo.domain.data
 
-import org.osmdroid.util.GeoPoint
+import co.anbora.labs.spatia.geometry.Point
 
 data class RunActionDetails(
     val id: Long,
@@ -8,5 +8,5 @@ data class RunActionDetails(
     val totalSteps: Long,
     val startTimestamp: Long,
     val endTimestamp: Long?,
-    val gpsPoints: List<GeoPoint>
+    val gpsPoints: List<Point>
 )

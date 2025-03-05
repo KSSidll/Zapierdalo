@@ -1,7 +1,9 @@
 package com.kssidll.zapierdalo.data.data.view
 
 import androidx.room.DatabaseView
+import androidx.room.SkipQueryVerification
 
+@SkipQueryVerification
 @DatabaseView(
     """
         SELECT

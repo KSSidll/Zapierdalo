@@ -117,6 +117,9 @@ dependencies {
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.paging)
 
+    // Spatia Room
+    implementation(libs.dev.anboralabs.room.spatia)
+
     // Helpers
     implementation(libs.google.accompanist)
 

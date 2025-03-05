@@ -30,6 +30,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
+import co.anbora.labs.spatia.geometry.Point
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
@@ -332,9 +333,7 @@ class RunningActionService: Service(), SensorEventListener {
 
                         val entity = GpsEntity(
                             runActionId = runActionId!!,
-                            latitude = location.latitude,
-                            longitude = location.longitude,
-                            altitude = location.altitude,
+                            location = Point(location.latitude, location.longitude),
                             accuracy = location.accuracy,
                             speed = location.speed * 3.6f, // parse to kmh
                         )
