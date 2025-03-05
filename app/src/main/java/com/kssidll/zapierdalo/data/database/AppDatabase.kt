@@ -68,7 +68,7 @@ abstract class AppDatabase: RoomDatabase() {
                     db.query("SELECT InitSpatialMetaData();").moveToNext()
                     // Room already creates a BLOB column for the geometry, so we need to use
                     // RecoverGeometryColumn to correctly initialize Spatialite's metadata
-                    db.query("SELECT RecoverGeometryColumn('geo_posts', 'location', 4326, 'POINT', 'XY');")
+                    db.query("SELECT RecoverGeometryColumn('GpsEntity', 'location', 4326, 'POINT', 'XY');")
                         .moveToNext()
                 }
             })
