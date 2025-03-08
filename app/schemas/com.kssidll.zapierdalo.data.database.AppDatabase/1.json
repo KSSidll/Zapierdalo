@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "3e6c57ee1d09456bd2a4c819bf3af52a",
+    "identityHash": "77f2f5fd76bb63876f207a635cd8f90c",
     "entities": [
       {
         "tableName": "StepsEntity",
@@ -202,7 +202,7 @@
       },
       {
         "viewName": "GpsPath",
-        "createSql": "CREATE VIEW `${VIEW_NAME}` AS -- build a simplified linestring from all gps per run action\n        SELECT \n            runActionId, \n            ST_Simplify(\n                ST_LineFromText(\n                    'LINESTRING(' || GROUP_CONCAT(ST_X(location) || ' ' || ST_Y(location), ',') || ')',\n                    ST_SRID(location)\n                ),\n                5 -- 5 meters tolerance for simplification\n            ) AS path\n        FROM GpsEntity\n        GROUP BY runActionId\n        ORDER BY id ASC"
+        "createSql": "CREATE VIEW `${VIEW_NAME}` AS -- build a simplified linestring from all gps per run action\n        SELECT \n            runActionId, \n            ST_Simplify(\n                MakeLine(location),\n                5 -- 5 meters tolerance for simplification\n            ) AS path\n        FROM GpsEntity\n        GROUP BY runActionId\n        ORDER BY id ASC"
       },
       {
         "viewName": "RunAction",
@@ -215,7 +215,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '3e6c57ee1d09456bd2a4c819bf3af52a')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '77f2f5fd76bb63876f207a635cd8f90c')"
     ]
   }
 }

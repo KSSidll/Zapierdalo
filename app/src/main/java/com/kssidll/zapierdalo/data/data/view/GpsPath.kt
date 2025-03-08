@@ -11,10 +11,7 @@ import co.anbora.labs.spatia.geometry.LineString
         SELECT 
             runActionId, 
             ST_Simplify(
-                ST_LineFromText(
-                    'LINESTRING(' || GROUP_CONCAT(ST_X(location) || ' ' || ST_Y(location), ',') || ')',
-                    ST_SRID(location)
-                ),
+                MakeLine(location),
                 5 -- 5 meters tolerance for simplification
             ) AS path
         FROM GpsEntity
