@@ -1,10 +1,10 @@
 package com.kssidll.zapierdalo.di.module.usecase
 
 import com.kssidll.zapierdalo.domain.repository.RunActionRepository
-import com.kssidll.zapierdalo.domain.usecase.runaction.DeleteRunActionEntityUseCase
-import com.kssidll.zapierdalo.domain.usecase.runaction.GetAllPagedRunActionUseCase
-import com.kssidll.zapierdalo.domain.usecase.runaction.GetLatestRunActionUseCase
-import com.kssidll.zapierdalo.domain.usecase.runaction.GetRunActionEntityUseCase
+import com.kssidll.zapierdalo.domain.usecase.runaction.DeleteRunActionUseCase
+import com.kssidll.zapierdalo.domain.usecase.runaction.GetAllPagedRunActionSummaryUseCase
+import com.kssidll.zapierdalo.domain.usecase.runaction.GetRunActionSummaryUseCase
+import com.kssidll.zapierdalo.domain.usecase.runaction.GetRunActionUseCase
 import com.kssidll.zapierdalo.domain.usecase.runaction.InsertRunActionEntityUseCase
 import com.kssidll.zapierdalo.domain.usecase.runaction.SetRunActionEndTimestampUseCase
 import dagger.Module
@@ -36,31 +36,31 @@ class RunActionUseCaseModule {
     @ViewModelScoped
     fun provideDeleteRunActionEntityUseCase(
         runActionRepository: RunActionRepository
-    ): DeleteRunActionEntityUseCase {
-        return DeleteRunActionEntityUseCase(runActionRepository)
+    ): DeleteRunActionUseCase {
+        return DeleteRunActionUseCase(runActionRepository)
     }
 
     @Provides
     @ViewModelScoped
-    fun provideGetRunActionEntityUseCase(
+    fun provideGetRunActionUseCase(
         runActionRepository: RunActionRepository,
-    ): GetRunActionEntityUseCase {
-        return GetRunActionEntityUseCase(runActionRepository)
+    ): GetRunActionUseCase {
+        return GetRunActionUseCase(runActionRepository)
     }
 
     @Provides
     @ViewModelScoped
-    fun provideGetAllPagedRunActionUseCase(
+    fun provideGetRunActionSummaryUseCase(
         runActionRepository: RunActionRepository,
-    ): GetAllPagedRunActionUseCase {
-        return GetAllPagedRunActionUseCase(runActionRepository)
+    ): GetRunActionSummaryUseCase {
+        return GetRunActionSummaryUseCase(runActionRepository)
     }
 
     @Provides
     @ViewModelScoped
-    fun provideGetLatestRunActionUseCase(
+    fun provideGetAllPagedRunActionSummaryUseCase(
         runActionRepository: RunActionRepository,
-    ): GetLatestRunActionUseCase {
-        return GetLatestRunActionUseCase(runActionRepository)
+    ): GetAllPagedRunActionSummaryUseCase {
+        return GetAllPagedRunActionSummaryUseCase(runActionRepository)
     }
 }

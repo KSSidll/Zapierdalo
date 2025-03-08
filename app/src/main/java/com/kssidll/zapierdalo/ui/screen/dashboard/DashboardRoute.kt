@@ -12,7 +12,7 @@ import com.kssidll.zapierdalo.service.rememberRunningActionServicePreparationLau
 @Composable
 fun DashboardRoute(
     navigateSettings: () -> Unit,
-    navigateRunActionDetails: (runActionEntityId: Long) -> Unit,
+    navigateRunAction: (runActionEntityId: Long) -> Unit,
     viewModel: DashboardViewModel = hiltViewModel()
 ) {
     val runningActionServicePreparationLauncher = rememberRunningActionServicePreparationLauncher(
@@ -30,8 +30,8 @@ fun DashboardRoute(
                     navigateSettings()
                 }
 
-                is DashboardEvent.NavigateRunActionDetails -> {
-                    navigateRunActionDetails(event.runAction.id)
+                is DashboardEvent.NavigateRunAction -> {
+                    navigateRunAction(event.runActionSummary.id)
                 }
 
                 is DashboardEvent.StartRunningAction -> {

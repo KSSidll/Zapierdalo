@@ -10,7 +10,3 @@ fun Point.toGeoPoint(): GeoPoint {
 fun List<Point>.toGeoPointList(): List<GeoPoint> {
     return map { it.toGeoPoint() }
 }
-
-fun List<Point>.lastGeoPoint(): GeoPoint? {
-    return lastOrNull()?.toGeoPoint()
-}

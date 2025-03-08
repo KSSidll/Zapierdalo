@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
 import javax.inject.Inject
 
-class GetRunActionEntityUseCase @Inject constructor(
+class GetRunActionUseCase @Inject constructor(
     private val runActionRepository: RunActionRepository,
 ) {
     operator fun invoke(

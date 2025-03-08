@@ -50,7 +50,7 @@ import com.kssidll.zapierdalo.data.data.GpsEntity
 import com.kssidll.zapierdalo.data.data.RunActionEntity
 import com.kssidll.zapierdalo.data.data.StepsEntity
 import com.kssidll.zapierdalo.domain.usecase.gps.InsertGpsEntityUseCase
-import com.kssidll.zapierdalo.domain.usecase.runaction.GetRunActionEntityUseCase
+import com.kssidll.zapierdalo.domain.usecase.runaction.GetRunActionUseCase
 import com.kssidll.zapierdalo.domain.usecase.runaction.InsertRunActionEntityUseCase
 import com.kssidll.zapierdalo.domain.usecase.runaction.SetRunActionEndTimestampUseCase
 import com.kssidll.zapierdalo.domain.usecase.steps.InsertStepsEntityUseCase
@@ -65,6 +65,9 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.util.Calendar
 import javax.inject.Inject
+import kotlin.math.absoluteValue
+import kotlin.math.pow
+import kotlin.math.sqrt
 
 /**
  * Possible actions that the [RunningActionService] can perform
@@ -154,7 +157,7 @@ class RunningActionService: Service(), SensorEventListener {
     lateinit var insertRunActionEntityUseCase: InsertRunActionEntityUseCase
 
     @Inject
-    lateinit var getRunActionEntityUseCase: GetRunActionEntityUseCase
+    lateinit var getRunActionEntityUseCase: GetRunActionUseCase
 
     @Inject
     lateinit var setRunActionEndTimestampUseCase: SetRunActionEndTimestampUseCase
@@ -178,6 +181,9 @@ class RunningActionService: Service(), SensorEventListener {
 
     // step counter sensor
     private var stepCounterSensor: Sensor? = null
+
+    // linear acceleration sensor
+    private var linearAccelerationSensor: Sensor? = null
 
     private fun registerLocaleChangeReceiver() {
         val filter = IntentFilter(Intent.ACTION_LOCALE_CHANGED)
@@ -248,6 +254,7 @@ class RunningActionService: Service(), SensorEventListener {
         )
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         stepCounterSensor = sensorManager?.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
+        linearAccelerationSensor = sensorManager?.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION)
     }
 
     override fun onDestroy() {
@@ -311,9 +318,17 @@ class RunningActionService: Service(), SensorEventListener {
                 sensorManager?.registerListener(
                     this,
                     stepCounterSensor,
-                    SensorManager.SENSOR_DELAY_FASTEST
+                    SensorManager.SENSOR_DELAY_UI
                 )
             }
+        }
+
+        linearAccelerationSensor?.let { stepCounterSensor ->
+            sensorManager?.registerListener(
+                this,
+                stepCounterSensor,
+                SensorManager.SENSOR_DELAY_NORMAL
+            )
         }
 
         locationCallback = object: LocationCallback() {
@@ -510,17 +525,82 @@ class RunningActionService: Service(), SensorEventListener {
             .build()
     }
 
+    val startAccelerationBuffer: MutableList<FloatArray> = mutableListOf()
+    var calibrated = false
+    var xCalibrationAverage: Float = 0f
+    var yCalibrationAverage: Float = 0f
+    var zCalibrationAverage: Float = 0f
+
+    var xCalibrationLowPassOffset: Float = 0f
+    var yCalibrationLowPassOffset: Float = 0f
+    var zCalibrationLowPassOffset: Float = 0f
+
     override fun onSensorChanged(sensorEvent: SensorEvent?) {
         // location defined in start
         sensorEvent?.let { event ->
             when (event.sensor.type) {
+                Sensor.TYPE_LINEAR_ACCELERATION -> {
+                    if (startAccelerationBuffer.size != 100) {
+                        startAccelerationBuffer.add(event.values)
+                        return
+                    } else if (!calibrated) {
+                        xCalibrationAverage =
+                            startAccelerationBuffer.sumOf { it[0].toDouble() }
+                                .div(startAccelerationBuffer.size)
+                                .toFloat()
+                        yCalibrationAverage =
+                            startAccelerationBuffer.sumOf { it[1].toDouble() }
+                                .div(startAccelerationBuffer.size)
+                                .toFloat()
+                        zCalibrationAverage =
+                            startAccelerationBuffer.sumOf { it[2].toDouble() }
+                                .div(startAccelerationBuffer.size)
+                                .toFloat()
+
+                        xCalibrationLowPassOffset =
+                            (startAccelerationBuffer.maxOf { it[0].absoluteValue } - xCalibrationAverage).absoluteValue * 1.2f
+                        yCalibrationLowPassOffset =
+                            (startAccelerationBuffer.maxOf { it[1].absoluteValue } - yCalibrationAverage).absoluteValue * 1.2f
+                        zCalibrationLowPassOffset =
+                            (startAccelerationBuffer.maxOf { it[2].absoluteValue } - zCalibrationAverage).absoluteValue * 1.2f
+
+                        xCalibrationLowPassOffset = xCalibrationLowPassOffset.coerceAtLeast(1f / 3.6f)
+                        yCalibrationLowPassOffset = yCalibrationLowPassOffset.coerceAtLeast(1f / 3.6f)
+                        zCalibrationLowPassOffset = zCalibrationLowPassOffset.coerceAtLeast(1f / 3.6f)
+
+                        calibrated = true
+                    }
+
+                    var x = event.values[0] - xCalibrationAverage
+                    var y = event.values[1] - yCalibrationAverage
+                    var z = event.values[2] - zCalibrationAverage
+
+                    x = if (x.absoluteValue - xCalibrationLowPassOffset < 0f) 0f else x
+                    y = if (y.absoluteValue - yCalibrationLowPassOffset < 0f) 0f else y
+                    z = if (z.absoluteValue - zCalibrationLowPassOffset < 0f) 0f else z
+
+                    val total = sqrt(x.pow(2) + y.pow(2) + z.pow(2))
+
+                    Log.d(
+                        TAG,
+                        "x: ${"%.2f".format(x * 3.6f)} m/s2 | y: ${"%.2f".format(y * 3.6f)} m/s2 | z: ${"%.2f".format(z * 3.6f)} m/s2 | total: ${
+                            "%.2f".format(total * 3.6f)
+                        } m/s2"
+                    )
+                }
+
                 Sensor.TYPE_STEP_COUNTER -> {
                     Log.d(
                         TAG,
-                        "stepsCallback: received data"
+                        "stepsCallback: receiving data"
                     )
 
                     val steps = event.values.lastOrNull()?.toLong() ?: return
+
+                    Log.d(
+                        TAG,
+                        "stepsCallback: received $steps"
+                    )
 
                     serviceScope.launch {
                         if (runActionId == null) {

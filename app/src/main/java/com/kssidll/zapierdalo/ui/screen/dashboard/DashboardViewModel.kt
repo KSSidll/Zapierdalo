@@ -12,10 +12,10 @@ import androidx.paging.cachedIn
 import androidx.paging.insertSeparators
 import androidx.paging.map
 import com.kssidll.zapierdalo.DAY_IN_MILIS
-import com.kssidll.zapierdalo.data.data.view.RunAction
+import com.kssidll.zapierdalo.data.data.view.RunActionSummary
 import com.kssidll.zapierdalo.domain.usecase.StartRunningActionServiceUseCase
 import com.kssidll.zapierdalo.domain.usecase.StopRunningActionServiceUseCase
-import com.kssidll.zapierdalo.domain.usecase.runaction.GetAllPagedRunActionUseCase
+import com.kssidll.zapierdalo.domain.usecase.runaction.GetAllPagedRunActionSummaryUseCase
 import com.kssidll.zapierdalo.service.RunningActionService
 import com.kssidll.zapierdalo.service.ServiceState
 import com.kssidll.zapierdalo.service.getServiceState
@@ -36,7 +36,7 @@ internal data object DashboardUiStateKeys {
 }
 
 data class DashboardUiState(
-    val runActionData: Flow<PagingData<RunActionElement>> = flowOf(),
+    val runActionSummaryData: Flow<PagingData<RunActionElement>> = flowOf(),
 
     val currentDestination: DashboardDestinations = DashboardDestinations.DEFAULT,
     val runsScreenListState: LazyListState = LazyListState(),
@@ -45,7 +45,7 @@ data class DashboardUiState(
 
 sealed class DashboardEvent {
     data object NavigateSettings: DashboardEvent()
-    data class NavigateRunActionDetails(val runAction: RunAction): DashboardEvent()
+    data class NavigateRunAction(val runActionSummary: RunActionSummary): DashboardEvent()
     data object StartRunningAction: DashboardEvent()
     data object StopRunningAction: DashboardEvent()
     data class ChangeScreenDestination(val newDestination: DashboardDestinations): DashboardEvent()
@@ -53,7 +53,7 @@ sealed class DashboardEvent {
 
 sealed class RunActionElement {
     data class Separator(val date: Long): RunActionElement()
-    data class Element(val data: RunAction): RunActionElement()
+    data class Element(val data: RunActionSummary): RunActionElement()
 }
 
 @HiltViewModel
@@ -61,7 +61,7 @@ class DashboardViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val startRunningActionServiceUseCase: StartRunningActionServiceUseCase,
     private val stopRunningActionServiceUseCase: StopRunningActionServiceUseCase,
-    private val getAllPagedRunActionUseCase: GetAllPagedRunActionUseCase,
+    private val getAllPagedRunActionSummaryUseCase: GetAllPagedRunActionSummaryUseCase,
     private val savedStateHandle: SavedStateHandle,
 ): ViewModel(), SharedPreferences.OnSharedPreferenceChangeListener {
     private val _uiState = MutableStateFlow(
@@ -78,7 +78,7 @@ class DashboardViewModel @Inject constructor(
 
         _uiState.update { currentState ->
             currentState.copy(
-                runActionData = getAllPagedRunActionUseCase()
+                runActionSummaryData = getAllPagedRunActionSummaryUseCase()
                     .map { flowPagingData ->
                         flowPagingData.map { runAction ->
                             RunActionElement.Element(runAction)
@@ -118,7 +118,7 @@ class DashboardViewModel @Inject constructor(
         when (event) {
             is DashboardEvent.NavigateSettings -> {}
 
-            is DashboardEvent.NavigateRunActionDetails -> {}
+            is DashboardEvent.NavigateRunAction -> {}
 
             is DashboardEvent.StartRunningAction -> {
                 startRunningActionServiceUseCase()

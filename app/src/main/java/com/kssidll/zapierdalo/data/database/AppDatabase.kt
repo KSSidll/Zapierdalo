@@ -10,14 +10,13 @@ import co.anbora.labs.spatia.geometry.GeometryConverters
 import com.kssidll.zapierdalo.APPLICATION_NAME
 import com.kssidll.zapierdalo.data.dao.GpsDao
 import com.kssidll.zapierdalo.data.dao.RunActionDao
-import com.kssidll.zapierdalo.data.dao.RunActionDetailsDao
 import com.kssidll.zapierdalo.data.dao.StepsDao
 import com.kssidll.zapierdalo.data.data.GpsEntity
 import com.kssidll.zapierdalo.data.data.RunActionEntity
 import com.kssidll.zapierdalo.data.data.StepsEntity
-import com.kssidll.zapierdalo.data.data.view.Gps
-import com.kssidll.zapierdalo.data.data.view.GpsDistance
+import com.kssidll.zapierdalo.data.data.view.GpsPath
 import com.kssidll.zapierdalo.data.data.view.RunAction
+import com.kssidll.zapierdalo.data.data.view.RunActionSummary
 import com.kssidll.zapierdalo.data.data.view.StepsAmount
 
 /**
@@ -28,22 +27,21 @@ const val DATABASE_NAME: String = APPLICATION_NAME + "_database.db"
 @Database(
     version = 1,
     entities = [
-        RunActionEntity::class,
-        GpsEntity::class,
         StepsEntity::class,
+        GpsEntity::class,
+        RunActionEntity::class,
     ],
     views = [
-        Gps::class,
-        GpsDistance::class,
-        RunAction::class,
         StepsAmount::class,
+        GpsPath::class,
+        RunAction::class,
+        RunActionSummary::class,
     ]
 )
 @TypeConverters(
     GeometryConverters::class
 )
 abstract class AppDatabase: RoomDatabase() {
-    abstract fun runActionDetailsDao(): RunActionDetailsDao
     abstract fun runActionDao(): RunActionDao
     abstract fun gpsDao(): GpsDao
     abstract fun stepsDao(): StepsDao

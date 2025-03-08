@@ -1,4 +1,4 @@
-package com.kssidll.zapierdalo.ui.screen.runactiondetails
+package com.kssidll.zapierdalo.ui.screen.runaction
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -25,7 +25,6 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.viewinterop.AndroidView
 import com.kssidll.zapierdalo.R
-import com.kssidll.zapierdalo.domain.data.lastGeoPoint
 import com.kssidll.zapierdalo.domain.data.toGeoPointList
 import com.kssidll.zapierdalo.helper.orPointZero
 import com.kssidll.zapierdalo.ui.component.SecondaryAppBar
@@ -40,9 +39,9 @@ import org.osmdroid.views.overlay.simplefastpoint.SimplePointTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RunActionDetailsScreen(
-    uiState: RunActionDetailsUiState,
-    onEvent: (event: RunActionDetailsEvent) -> Unit,
+fun RunActionScreen(
+    uiState: RunActionUiState,
+    onEvent: (event: RunActionEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var mapView: MapView? by remember { mutableStateOf(null) }
@@ -53,33 +52,33 @@ fun RunActionDetailsScreen(
 
     var sfpo: SimpleFastPointOverlay? by remember { mutableStateOf(null) }
 
-    val gpsPoints = uiState.runActionDetails?.gpsPoints.orEmpty()
+    val gpsPoints = uiState.runAction?.path?.toGeoPointList().orEmpty()
 
-    LaunchedEffect(mapView, uiState.runActionDetails, gpsPoints) {
-        if (uiState.runActionDetails != null) {
+    LaunchedEffect(mapView, uiState.runAction, gpsPoints) {
+        if (uiState.runAction != null) {
             mapView?.let { mapView ->
                 if (!mapViewInitialZoomSet) {
                     mapView.controller.setZoom(18.0)
                     mapViewInitialZoomSet = true
                 }
 
-                mapView.controller.setCenter(gpsPoints.lastGeoPoint().orPointZero())
+                mapView.controller.setCenter(gpsPoints.lastOrNull().orPointZero())
 
                 if (mapViewPolyline == null || !mapView.overlayManager.contains(mapViewPolyline)) {
                     mapViewPolyline = Polyline().apply {
                         outlinePaint.color = mapViewPolylineColor.toArgb()
-                        setPoints(gpsPoints.toGeoPointList())
+                        setPoints(gpsPoints)
                     }
                     mapView.overlayManager.add(mapViewPolyline)
                 } else {
-                    mapViewPolyline?.setPoints(gpsPoints.toGeoPointList())
+                    mapViewPolyline?.setPoints(gpsPoints)
                 }
 
                 if (sfpo != null) {
                     mapView.overlayManager.remove(sfpo)
                 }
 
-                val pt = SimplePointTheme(gpsPoints.toGeoPointList())
+                val pt = SimplePointTheme(gpsPoints)
                 val opt = SimpleFastPointOverlayOptions.getDefaultStyle()
                     .setAlgorithm(SimpleFastPointOverlayOptions.RenderingAlgorithm.MEDIUM_OPTIMIZATION)
                     .setRadius(5f)
@@ -98,12 +97,12 @@ fun RunActionDetailsScreen(
             SecondaryAppBar(
                 title = {},
                 onBack = {
-                    onEvent(RunActionDetailsEvent.NavigateBack)
+                    onEvent(RunActionEvent.NavigateBack)
                 },
                 actions = {
                     IconButton(
                         onClick = {
-                            onEvent(RunActionDetailsEvent.Delete)
+                            onEvent(RunActionEvent.Delete)
                         }
                     ) {
                         Icon(
@@ -123,7 +122,7 @@ fun RunActionDetailsScreen(
                 .consumeWindowInsets(paddingValues)
         ) {
             AnimatedVisibility(
-                visible = uiState.runActionDetails != null,
+                visible = uiState.runAction != null,
                 enter = fadeIn(),
                 exit = fadeOut()
             ) {

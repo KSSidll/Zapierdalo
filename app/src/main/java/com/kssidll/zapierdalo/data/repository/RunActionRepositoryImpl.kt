@@ -4,6 +4,7 @@ import androidx.paging.PagingSource
 import com.kssidll.zapierdalo.data.dao.RunActionDao
 import com.kssidll.zapierdalo.data.data.RunActionEntity
 import com.kssidll.zapierdalo.data.data.view.RunAction
+import com.kssidll.zapierdalo.data.data.view.RunActionSummary
 import com.kssidll.zapierdalo.domain.repository.RunActionRepository
 import kotlinx.coroutines.flow.Flow
 
@@ -37,11 +38,11 @@ class RunActionRepositoryImpl(private val dao: RunActionDao): RunActionRepositor
         return dao.get(id)
     }
 
-    override fun allPaged(): PagingSource<Int, RunAction> {
-        return dao.allPaged()
+    override fun getSummary(id: Long): Flow<RunActionSummary?> {
+        return dao.getSummary(id)
     }
 
-    override fun latest(): Flow<RunAction?> {
-        return dao.latest()
+    override fun allSummaryPaged(): PagingSource<Int, RunActionSummary> {
+        return dao.allPagedSummary()
     }
 }

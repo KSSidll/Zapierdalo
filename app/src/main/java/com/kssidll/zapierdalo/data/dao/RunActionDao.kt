@@ -8,6 +8,7 @@ import androidx.room.Query
 import androidx.room.SkipQueryVerification
 import com.kssidll.zapierdalo.data.data.RunActionEntity
 import com.kssidll.zapierdalo.data.data.view.RunAction
+import com.kssidll.zapierdalo.data.data.view.RunActionSummary
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -37,14 +38,10 @@ interface RunActionDao {
     fun get(id: Long): Flow<RunAction?>
 
     @SkipQueryVerification
-    @Query("SELECT * FROM RunAction ORDER BY id DESC")
-    fun all(): Flow<List<RunAction>>
+    @Query("SELECT * FROM RunActionSummary WHERE id = :id")
+    fun getSummary(id: Long): Flow<RunActionSummary?>
 
     @SkipQueryVerification
-    @Query("SELECT * FROM RunAction ORDER BY id DESC")
-    fun allPaged(): PagingSource<Int, RunAction>
-
-    @SkipQueryVerification
-    @Query("SELECT * FROM RunAction ORDER BY id DESC LIMIT 1")
-    fun latest(): Flow<RunAction?>
+    @Query("SELECT * FROM RunActionSummary ORDER BY id DESC")
+    fun allPagedSummary(): PagingSource<Int, RunActionSummary>
 }

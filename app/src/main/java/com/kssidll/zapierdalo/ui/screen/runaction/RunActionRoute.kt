@@ -1,4 +1,4 @@
-package com.kssidll.zapierdalo.ui.screen.runactiondetails
+package com.kssidll.zapierdalo.ui.screen.runaction
 
 
 import androidx.compose.runtime.Composable
@@ -7,17 +7,17 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Composable
-fun RunActionDetailsRoute(
+fun RunActionRoute(
     navigateBack: () -> Unit,
-    viewModel: RunActionDetailsViewModel = hiltViewModel()
+    viewModel: RunActionViewModel = hiltViewModel()
 ) {
-    RunActionDetailsScreen(
+    RunActionScreen(
         uiState = viewModel.uiState.collectAsStateWithLifecycle(minActiveState = Lifecycle.State.RESUMED).value,
         onEvent = { event ->
             when (event) {
-                is RunActionDetailsEvent.NavigateBack -> navigateBack()
+                is RunActionEvent.NavigateBack -> navigateBack()
 
-                is RunActionDetailsEvent.Delete -> {
+                is RunActionEvent.Delete -> {
                     viewModel.handleEvent(event)
                     navigateBack()
                 }

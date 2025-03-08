@@ -48,7 +48,7 @@ fun DashboardRunsScreen(
     onEvent: (event: DashboardEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val runActionList = uiState.runActionData.collectAsLazyPagingItems()
+    val runActionList = uiState.runActionSummaryData.collectAsLazyPagingItems()
 
     Scaffold(
         modifier = modifier
@@ -90,7 +90,7 @@ fun DashboardRunsScreen(
                                 modifier = Modifier
                                     .fillParentMaxWidth()
                                     .clickable {
-                                        onEvent(DashboardEvent.NavigateRunActionDetails(runAction))
+                                        onEvent(DashboardEvent.NavigateRunAction(runAction))
                                     }
                             ) {
                                 Spacer(modifier = Modifier.height(6.dp))

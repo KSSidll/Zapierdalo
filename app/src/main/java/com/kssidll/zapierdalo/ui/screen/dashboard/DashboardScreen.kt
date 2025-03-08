@@ -25,6 +25,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import com.kssidll.zapierdalo.R
 import com.kssidll.zapierdalo.helper.none
+import com.kssidll.zapierdalo.ui.screen.dashboard.DashboardDestinations.entries
 
 enum class DashboardDestinations(
     @StringRes val label: Int,

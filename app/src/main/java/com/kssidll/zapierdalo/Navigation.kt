@@ -14,7 +14,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.kssidll.zapierdalo.ui.screen.dashboard.DashboardRoute
-import com.kssidll.zapierdalo.ui.screen.runactiondetails.RunActionDetailsRoute
+import com.kssidll.zapierdalo.ui.screen.runaction.RunActionRoute
 import com.kssidll.zapierdalo.ui.screen.settings.SettingsRoute
 import kotlinx.serialization.Serializable
 
@@ -29,7 +29,7 @@ sealed class NavigationDestinations {
 
     @Immutable
     @Serializable
-    data class RunActionDetails(val runActionEntityId: Long): NavigationDestinations()
+    data class RunAction(val runActionEntityId: Long): NavigationDestinations()
 }
 
 val defaultNavigateEasing = CubicBezierEasing(
@@ -112,8 +112,8 @@ fun Navigation(
                 navigateSettings = {
                     navController.navigate(NavigationDestinations.Settings)
                 },
-                navigateRunActionDetails = { runActionEntityId ->
-                    navController.navigate(NavigationDestinations.RunActionDetails(runActionEntityId))
+                navigateRunAction = { runActionEntityId ->
+                    navController.navigate(NavigationDestinations.RunAction(runActionEntityId))
                 }
             )
         }
@@ -124,8 +124,8 @@ fun Navigation(
             )
         }
 
-        composable<NavigationDestinations.RunActionDetails> {
-            RunActionDetailsRoute(
+        composable<NavigationDestinations.RunAction> {
+            RunActionRoute(
                 navigateBack = navigateBack,
             )
         }

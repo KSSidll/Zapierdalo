@@ -3,6 +3,7 @@ package com.kssidll.zapierdalo.domain.repository
 import androidx.paging.PagingSource
 import com.kssidll.zapierdalo.data.data.RunActionEntity
 import com.kssidll.zapierdalo.data.data.view.RunAction
+import com.kssidll.zapierdalo.data.data.view.RunActionSummary
 import kotlinx.coroutines.flow.Flow
 
 interface RunActionRepository {
@@ -44,12 +45,13 @@ interface RunActionRepository {
     fun get(id: Long): Flow<RunAction?>
 
     /**
-     * Returns [PagingSource] of [RunAction] objects
+     * Returns a flow of [RunAction] object matching [id]
+     * @param id Id of the object to match with
      */
-    fun allPaged(): PagingSource<Int, RunAction>
+    fun getSummary(id: Long): Flow<RunActionSummary?>
 
     /**
-     * Returns a flow of latest [RunAction] object
+     * Returns [PagingSource] of [RunActionSummary] objects
      */
-    fun latest(): Flow<RunAction?>
+    fun allSummaryPaged(): PagingSource<Int, RunActionSummary>
 }

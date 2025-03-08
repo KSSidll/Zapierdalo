@@ -7,7 +7,7 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
-class DeleteRunActionEntityUseCase @Inject constructor(
+class DeleteRunActionUseCase @Inject constructor(
     private val runActionRepository: RunActionRepository,
 ) {
     suspend operator fun invoke(

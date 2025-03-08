@@ -3,15 +3,12 @@ package com.kssidll.zapierdalo.di.module
 import android.content.Context
 import com.kssidll.zapierdalo.data.dao.GpsDao
 import com.kssidll.zapierdalo.data.dao.RunActionDao
-import com.kssidll.zapierdalo.data.dao.RunActionDetailsDao
 import com.kssidll.zapierdalo.data.dao.StepsDao
 import com.kssidll.zapierdalo.data.database.AppDatabase
 import com.kssidll.zapierdalo.data.repository.GpsRepositoryImpl
-import com.kssidll.zapierdalo.data.repository.RunActionDetailsRepositoryImpl
 import com.kssidll.zapierdalo.data.repository.RunActionRepositoryImpl
 import com.kssidll.zapierdalo.data.repository.StepsRepositoryImpl
 import com.kssidll.zapierdalo.domain.repository.GpsRepository
-import com.kssidll.zapierdalo.domain.repository.RunActionDetailsRepository
 import com.kssidll.zapierdalo.domain.repository.RunActionRepository
 import com.kssidll.zapierdalo.domain.repository.StepsRepository
 import dagger.Module
@@ -40,16 +37,6 @@ class DatabaseModule {
     @Provides
     fun provideRunActionRepository(runActionDao: RunActionDao): RunActionRepository {
         return RunActionRepositoryImpl(runActionDao)
-    }
-
-    @Provides
-    fun provideRunActionDetailsDao(appDatabase: AppDatabase): RunActionDetailsDao {
-        return appDatabase.runActionDetailsDao()
-    }
-
-    @Provides
-    fun provideRunActionDetailsRepository(runActionDetailsDao: RunActionDetailsDao): RunActionDetailsRepository {
-        return RunActionDetailsRepositoryImpl(runActionDetailsDao)
     }
 
     @Provides

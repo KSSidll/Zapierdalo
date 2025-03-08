@@ -2,15 +2,21 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "dd332f1600b404a292d55084464f19fb",
+    "identityHash": "3e6c57ee1d09456bd2a4c819bf3af52a",
     "entities": [
       {
-        "tableName": "RunActionEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `startTimestamp` INTEGER NOT NULL, `endTimestamp` INTEGER)",
+        "tableName": "StepsEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `runActionId` INTEGER NOT NULL, `startTimestamp` INTEGER NOT NULL, `endTimestamp` INTEGER, `steps` INTEGER NOT NULL, FOREIGN KEY(`runActionId`) REFERENCES `RunActionEntity`(`id`) ON UPDATE CASCADE ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
             "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "runActionId",
+            "columnName": "runActionId",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -25,6 +31,12 @@
             "columnName": "endTimestamp",
             "affinity": "INTEGER",
             "notNull": false
+          },
+          {
+            "fieldPath": "steps",
+            "columnName": "steps",
+            "affinity": "INTEGER",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -35,16 +47,28 @@
         },
         "indices": [
           {
-            "name": "index_RunActionEntity_id",
+            "name": "index_StepsEntity_runActionId",
             "unique": false,
             "columnNames": [
-              "id"
+              "runActionId"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_RunActionEntity_id` ON `${TABLE_NAME}` (`id`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_StepsEntity_runActionId` ON `${TABLE_NAME}` (`runActionId`)"
           }
         ],
-        "foreignKeys": []
+        "foreignKeys": [
+          {
+            "table": "RunActionEntity",
+            "onDelete": "CASCADE",
+            "onUpdate": "CASCADE",
+            "columns": [
+              "runActionId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
       },
       {
         "tableName": "GpsEntity",
@@ -129,18 +153,12 @@
         ]
       },
       {
-        "tableName": "StepsEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `runActionId` INTEGER NOT NULL, `startTimestamp` INTEGER NOT NULL, `endTimestamp` INTEGER, `steps` INTEGER NOT NULL, FOREIGN KEY(`runActionId`) REFERENCES `RunActionEntity`(`id`) ON UPDATE CASCADE ON DELETE CASCADE )",
+        "tableName": "RunActionEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `startTimestamp` INTEGER NOT NULL, `endTimestamp` INTEGER)",
         "fields": [
           {
             "fieldPath": "id",
             "columnName": "id",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "runActionId",
-            "columnName": "runActionId",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -155,12 +173,6 @@
             "columnName": "endTimestamp",
             "affinity": "INTEGER",
             "notNull": false
-          },
-          {
-            "fieldPath": "steps",
-            "columnName": "steps",
-            "affinity": "INTEGER",
-            "notNull": true
           }
         ],
         "primaryKey": {
@@ -171,51 +183,39 @@
         },
         "indices": [
           {
-            "name": "index_StepsEntity_runActionId",
+            "name": "index_RunActionEntity_id",
             "unique": false,
             "columnNames": [
-              "runActionId"
+              "id"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_StepsEntity_runActionId` ON `${TABLE_NAME}` (`runActionId`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_RunActionEntity_id` ON `${TABLE_NAME}` (`id`)"
           }
         ],
-        "foreignKeys": [
-          {
-            "table": "RunActionEntity",
-            "onDelete": "CASCADE",
-            "onUpdate": "CASCADE",
-            "columns": [
-              "runActionId"
-            ],
-            "referencedColumns": [
-              "id"
-            ]
-          }
-        ]
+        "foreignKeys": []
       }
     ],
     "views": [
-      {
-        "viewName": "Gps",
-        "createSql": "CREATE VIEW `${VIEW_NAME}` AS SELECT\n            ge.runActionId,\n            ge.location\n        FROM GpsEntity ge"
-      },
-      {
-        "viewName": "GpsDistance",
-        "createSql": "CREATE VIEW `${VIEW_NAME}` AS -- build a simplified linestring from all gps per run action and calculate length in meters\n        SELECT \n            runActionId, \n            ST_Length(\n                ST_Simplify(\n                    ST_LineFromText(\n                        'LINESTRING(' || GROUP_CONCAT(ST_X(location) || ' ' || ST_Y(location), ',') || ')',\n                        ST_SRID(location)\n                    ),\n                    5 -- 5 meters tolerance for simplification\n                )\n            ) AS totalDistance\n        FROM GpsEntity\n        GROUP BY runActionId\n        ORDER BY id ASC"
-      },
       {
         "viewName": "StepsAmount",
         "createSql": "CREATE VIEW `${VIEW_NAME}` AS SELECT\n            runActionId,\n            SUM(steps) as totalSteps\n        FROM StepsEntity\n        GROUP BY runActionId"
       },
       {
+        "viewName": "GpsPath",
+        "createSql": "CREATE VIEW `${VIEW_NAME}` AS -- build a simplified linestring from all gps per run action\n        SELECT \n            runActionId, \n            ST_Simplify(\n                ST_LineFromText(\n                    'LINESTRING(' || GROUP_CONCAT(ST_X(location) || ' ' || ST_Y(location), ',') || ')',\n                    ST_SRID(location)\n                ),\n                5 -- 5 meters tolerance for simplification\n            ) AS path\n        FROM GpsEntity\n        GROUP BY runActionId\n        ORDER BY id ASC"
+      },
+      {
         "viewName": "RunAction",
-        "createSql": "CREATE VIEW `${VIEW_NAME}` AS SELECT\n            rae.id,\n            gd.totalDistance,\n            sa.totalSteps,\n            rae.startTimestamp,\n            rae.endTimestamp\n        FROM RunActionEntity rae\n        LEFT JOIN GpsDistance gd ON gd.runActionId = rae.id\n        LEFT JOIN StepsAmount sa ON sa.runActionId = rae.id"
+        "createSql": "CREATE VIEW `${VIEW_NAME}` AS SELECT\n            rae.id,\n            gp.path,\n            sa.totalSteps,\n            rae.startTimestamp,\n            rae.endTimestamp\n        FROM RunActionEntity rae\n        LEFT JOIN GpsPath gp ON gp.runActionId = rae.id\n        LEFT JOIN StepsAmount sa ON sa.runActionId = rae.id"
+      },
+      {
+        "viewName": "RunActionSummary",
+        "createSql": "CREATE VIEW `${VIEW_NAME}` AS SELECT\n            id,\n            ST_Length(path) AS totalDistance,\n            totalSteps,\n            startTimestamp,\n            endTimestamp\n        FROM RunAction"
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'dd332f1600b404a292d55084464f19fb')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '3e6c57ee1d09456bd2a4c819bf3af52a')"
     ]
   }
 }
