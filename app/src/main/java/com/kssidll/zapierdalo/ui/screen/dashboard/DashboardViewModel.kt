@@ -12,10 +12,12 @@ import androidx.paging.cachedIn
 import androidx.paging.insertSeparators
 import androidx.paging.map
 import com.kssidll.zapierdalo.DAY_IN_MILIS
+import com.kssidll.zapierdalo.data.data.RunActionEntity
 import com.kssidll.zapierdalo.data.data.view.RunActionSummary
 import com.kssidll.zapierdalo.domain.usecase.StartRunningActionServiceUseCase
 import com.kssidll.zapierdalo.domain.usecase.StopRunningActionServiceUseCase
 import com.kssidll.zapierdalo.domain.usecase.runaction.GetAllPagedRunActionSummaryUseCase
+import com.kssidll.zapierdalo.domain.usecase.runaction.InsertRunActionEntityUseCase
 import com.kssidll.zapierdalo.service.RunningActionService
 import com.kssidll.zapierdalo.service.ServiceState
 import com.kssidll.zapierdalo.service.getServiceState
@@ -29,6 +31,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 internal data object DashboardUiStateKeys {
@@ -62,6 +65,7 @@ class DashboardViewModel @Inject constructor(
     private val startRunningActionServiceUseCase: StartRunningActionServiceUseCase,
     private val stopRunningActionServiceUseCase: StopRunningActionServiceUseCase,
     private val getAllPagedRunActionSummaryUseCase: GetAllPagedRunActionSummaryUseCase,
+    private val insertRunActionEntityUseCase: InsertRunActionEntityUseCase,
     private val savedStateHandle: SavedStateHandle,
 ): ViewModel(), SharedPreferences.OnSharedPreferenceChangeListener {
     private val _uiState = MutableStateFlow(
@@ -120,8 +124,9 @@ class DashboardViewModel @Inject constructor(
 
             is DashboardEvent.NavigateRunAction -> {}
 
-            is DashboardEvent.StartRunningAction -> {
-                startRunningActionServiceUseCase()
+            is DashboardEvent.StartRunningAction -> viewModelScope.launch {
+                val entityId = insertRunActionEntityUseCase(RunActionEntity())
+                startRunningActionServiceUseCase(entityId)
             }
 
             is DashboardEvent.StopRunningAction -> {

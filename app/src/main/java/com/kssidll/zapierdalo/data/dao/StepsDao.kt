@@ -24,4 +24,7 @@ interface StepsDao {
 
     // Read
 
+    @Query("SELECT * FROM StepsEntity WHERE runActionId = :runActionId ORDER BY id DESC LIMIT 1")
+    suspend fun getLastEntityForRunAction(runActionId: Long): StepsEntity?
+
 }

@@ -1,6 +1,7 @@
 package com.kssidll.zapierdalo.di.module.usecase
 
 import com.kssidll.zapierdalo.domain.repository.StepsRepository
+import com.kssidll.zapierdalo.domain.usecase.steps.GetLastStepsEntityForRunActionUseCase
 import com.kssidll.zapierdalo.domain.usecase.steps.InsertStepsEntityUseCase
 import com.kssidll.zapierdalo.domain.usecase.steps.SetStepsCountUseCase
 import com.kssidll.zapierdalo.domain.usecase.steps.SetStepsEndTimestampUseCase
@@ -16,9 +17,13 @@ class StepsUseCaseModule {
     @Provides
     @ViewModelScoped
     fun provideInsertStepsEntityUseCase(
+        getLastStepsEntityForRunActionUseCase: GetLastStepsEntityForRunActionUseCase,
         stepsRepository: StepsRepository
     ): InsertStepsEntityUseCase {
-        return InsertStepsEntityUseCase(stepsRepository)
+        return InsertStepsEntityUseCase(
+            getLastStepsEntityForRunActionUseCase = getLastStepsEntityForRunActionUseCase,
+            stepsRepository = stepsRepository
+        )
     }
 
     @Provides
@@ -37,6 +42,16 @@ class StepsUseCaseModule {
         stepsRepository: StepsRepository,
     ): SetStepsCountUseCase {
         return SetStepsCountUseCase(
+            stepsRepository = stepsRepository
+        )
+    }
+
+    @Provides
+    @ViewModelScoped
+    fun provideGetLastStepsEntityForRunActionUseCase(
+        stepsRepository: StepsRepository,
+    ): GetLastStepsEntityForRunActionUseCase {
+        return GetLastStepsEntityForRunActionUseCase(
             stepsRepository = stepsRepository
         )
     }

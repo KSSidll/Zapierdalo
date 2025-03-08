@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.kssidll.zapierdalo.NavigationDestinations
 import com.kssidll.zapierdalo.data.data.view.RunAction
+import com.kssidll.zapierdalo.domain.usecase.StopRunningActionServiceUseCase
 import com.kssidll.zapierdalo.domain.usecase.runaction.DeleteRunActionUseCase
 import com.kssidll.zapierdalo.domain.usecase.runaction.GetRunActionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -30,6 +31,7 @@ sealed class RunActionEvent {
 class RunActionViewModel @Inject constructor(
     private val getRunActionUseCase: GetRunActionUseCase,
     private val deleteRunActionEntityUseCase: DeleteRunActionUseCase,
+    private val stopRunningActionServiceUseCase: StopRunningActionServiceUseCase,
     savedStateHandle: SavedStateHandle,
 ): ViewModel() {
     private val _uiState = MutableStateFlow(
@@ -63,6 +65,7 @@ class RunActionViewModel @Inject constructor(
     private fun deleteRunAction() = viewModelScope.launch {
         val localState = uiState.value
         localState.runAction?.let {
+            stopRunningActionServiceUseCase(it.id)
             deleteRunActionEntityUseCase(it.id)
         }
     }

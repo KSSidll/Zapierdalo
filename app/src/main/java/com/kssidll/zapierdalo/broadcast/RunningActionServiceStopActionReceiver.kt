@@ -22,7 +22,7 @@ class RunningActionServiceStopActionReceiver: BroadcastReceiver() {
         )
 
         context?.let {
-            RunningActionService.stop(it)
+            RunningActionService.stop(it, null)
         }
     }
 

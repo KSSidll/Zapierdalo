@@ -27,4 +27,6 @@ interface StepsRepository {
 
     // Read
 
+    suspend fun getLastEntityForRunAction(runActionId: Long): StepsEntity?
+
 }

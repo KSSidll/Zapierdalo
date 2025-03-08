@@ -47,17 +47,18 @@ import com.kssidll.zapierdalo.MainActivity
 import com.kssidll.zapierdalo.R
 import com.kssidll.zapierdalo.broadcast.RunningActionServiceStopActionReceiver
 import com.kssidll.zapierdalo.data.data.GpsEntity
-import com.kssidll.zapierdalo.data.data.RunActionEntity
 import com.kssidll.zapierdalo.data.data.StepsEntity
 import com.kssidll.zapierdalo.domain.usecase.gps.InsertGpsEntityUseCase
 import com.kssidll.zapierdalo.domain.usecase.runaction.GetRunActionUseCase
 import com.kssidll.zapierdalo.domain.usecase.runaction.InsertRunActionEntityUseCase
 import com.kssidll.zapierdalo.domain.usecase.runaction.SetRunActionEndTimestampUseCase
+import com.kssidll.zapierdalo.domain.usecase.steps.GetLastStepsEntityForRunActionUseCase
 import com.kssidll.zapierdalo.domain.usecase.steps.InsertStepsEntityUseCase
 import com.kssidll.zapierdalo.domain.usecase.steps.SetStepsCountUseCase
 import com.kssidll.zapierdalo.domain.usecase.steps.SetStepsEndTimestampUseCase
 import com.kssidll.zapierdalo.helper.checkPermission
 import com.kssidll.zapierdalo.helper.getLocalizedString
+import com.kssidll.zapierdalo.service.RunningActionService.Companion.UNDEFINED_RUN_ACTION_ID
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -65,16 +66,12 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.util.Calendar
 import javax.inject.Inject
-import kotlin.math.absoluteValue
-import kotlin.math.pow
-import kotlin.math.sqrt
 
 /**
  * Possible actions that the [RunningActionService] can perform
  */
 enum class RunningActionServiceActions {
     START,
-    PAUSE,
     STOP
 }
 
@@ -163,6 +160,9 @@ class RunningActionService: Service(), SensorEventListener {
     lateinit var setRunActionEndTimestampUseCase: SetRunActionEndTimestampUseCase
 
     @Inject
+    lateinit var getLastStepsEntityForRunActionUseCase: GetLastStepsEntityForRunActionUseCase
+
+    @Inject
     lateinit var insertStepsEntityUseCase: InsertStepsEntityUseCase
 
     @Inject
@@ -171,8 +171,7 @@ class RunningActionService: Service(), SensorEventListener {
     @Inject
     lateinit var setStepsCountUseCase: SetStepsCountUseCase
 
-    private var runActionId: Long? = null
-    private var stepsId: Long? = null
+    private var activeRunActionIdList: MutableList<Long> = mutableListOf()
     private var stepsStartCount: Long? = null
 
     // gps sensor
@@ -181,9 +180,6 @@ class RunningActionService: Service(), SensorEventListener {
 
     // step counter sensor
     private var stepCounterSensor: Sensor? = null
-
-    // linear acceleration sensor
-    private var linearAccelerationSensor: Sensor? = null
 
     private fun registerLocaleChangeReceiver() {
         val filter = IntentFilter(Intent.ACTION_LOCALE_CHANGED)
@@ -207,26 +203,18 @@ class RunningActionService: Service(), SensorEventListener {
         flags: Int,
         startId: Int
     ): Int {
-        Log.d(
-            TAG,
-            "onStartCommand: Executed with startId: $startId"
-        )
+        Log.d(TAG, "onStartCommand: Executed with startId: $startId")
 
         if (intent != null) {
+            val runActionId = intent.getLongExtra(RUN_ACTION_KEY, UNDEFINED_RUN_ACTION_ID)
+
             when (intent.action) {
-                RunningActionServiceActions.START.name -> startAction()
-                RunningActionServiceActions.PAUSE.name -> TODO()
-                RunningActionServiceActions.STOP.name -> stopAction()
-                else -> Log.e(
-                    TAG,
-                    "onStartCommand: No action in the received intent"
-                )
+                RunningActionServiceActions.START.name -> startAction(runActionId)
+                RunningActionServiceActions.STOP.name -> stopAction(runActionId)
+                else -> Log.e(TAG, "onStartCommand: No action in the received intent")
             }
         } else {
-            Log.e(
-                TAG,
-                "onStartCommand: No intent"
-            )
+            Log.e(TAG, "onStartCommand: No intent")
         }
 
         return START_STICKY
@@ -235,10 +223,7 @@ class RunningActionService: Service(), SensorEventListener {
     override fun onCreate() {
         super.onCreate()
 
-        Log.d(
-            TAG,
-            "onCreate: Service created"
-        )
+        Log.d(TAG, "onCreate: Service created")
 
         // Initialize the scope
         serviceJob = Job()
@@ -254,22 +239,28 @@ class RunningActionService: Service(), SensorEventListener {
         )
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         stepCounterSensor = sensorManager?.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
-        linearAccelerationSensor = sensorManager?.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION)
     }
 
     override fun onDestroy() {
-        super.onDestroy()
+        Log.d(TAG, "onDestroy: Removing location updates")
+        fusedLocationClient.removeLocationUpdates(locationCallback!!)
 
-        Log.d(
-            TAG,
-            "onDestroy: Service destroyed"
-        )
-
+        Log.d(TAG, "onDestroy: Unregistering sensor listeners")
         unregisterReceiver(localeChangeReceiver)
         sensorManager?.unregisterListener(this)
+
+        Log.d(TAG, "onDestroy: Canceling the service job")
         serviceJob.cancel()
+
+        super.onDestroy()
+        Log.d(TAG, "onDestroy: Service destroyed")
     }
 
+    /**
+     * Initializes the service
+     * Creates the notification channel
+     * Starts the foreground notification
+     */
     private fun init() {
         createNotificationChannel()
 
@@ -285,31 +276,84 @@ class RunningActionService: Service(), SensorEventListener {
         )
     }
 
-    private fun startAction() {
-        Log.d(
-            TAG,
-            "startAction: Attempting to start"
-        )
+    /**
+     * Activates the specified [runActionId]
+     */
+    private fun activateRunAction(runActionId: Long) {
+        if (runActionId == UNDEFINED_RUN_ACTION_ID) {
+            Log.e(TAG, "activateRunAction: Attempted to activate undefined run action id")
+            return
+        }
+
+        if (runActionId !in activeRunActionIdList) {
+            Log.d(TAG, "activateRunAction: Activating $runActionId")
+
+            activeRunActionIdList.add(runActionId)
+        } else {
+            Log.d(TAG, "activateRunAction: Tried to activate $runActionId, but it's already active")
+        }
+    }
+
+    /**
+     * Deactivates specified [runActionId] and updates affected entities
+     * [UNDEFINED_RUN_ACTION_ID] deactivates all active run actions
+     */
+    private fun deactivateRunAction(runActionId: Long): Job {
+        return serviceScope.launch {
+            val endTimestamp = Calendar.getInstance().timeInMillis
+
+            if (runActionId == UNDEFINED_RUN_ACTION_ID) {
+                Log.d(TAG, "stopAction: Deactivating all run actions")
+
+                // TODO refactor steps entity handling and update here
+                activeRunActionIdList.forEach { entityId ->
+                    getLastStepsEntityForRunActionUseCase(entityId)?.let { lastStepsEntity ->
+                        setStepsEndTimestampUseCase(lastStepsEntity.id, endTimestamp)
+                    }
+                    setRunActionEndTimestampUseCase(entityId, endTimestamp)
+                }
+
+                activeRunActionIdList.clear()
+            } else {
+                val wasDeactivated = activeRunActionIdList.remove(runActionId)
+
+                if (wasDeactivated) {
+                    Log.d(TAG, "stopAction: Deactivating run action $runActionId")
+
+                    getLastStepsEntityForRunActionUseCase(runActionId)?.let { lastStepsEntity ->
+                        setStepsEndTimestampUseCase(lastStepsEntity.id, endTimestamp)
+                    }
+                    setRunActionEndTimestampUseCase(runActionId, endTimestamp)
+                } else {
+                    Log.d(TAG, "stopAction: Tried to deactivate run action $runActionId, but it's not active")
+                }
+            }
+        }
+    }
+
+    /**
+     * Starts service for the specified [runActionId]
+     */
+    private fun startAction(runActionId: Long) {
+        if (runActionId == UNDEFINED_RUN_ACTION_ID) {
+            Log.e(TAG, "startAction: Attempted to start for undefined run action id")
+            return
+        }
+
+        activateRunAction(runActionId)
+
+        Log.d(TAG, "startAction: Attempting to start")
 
         // early return if already started
         if (getServiceState(SERVICE_NAME) == ServiceState.STARTED) {
-            Log.d(
-                TAG,
-                "startAction: Service already set as running"
-            )
+            Log.d(TAG, "startAction: Service already set as running")
             return
         }
 
         // set as started
-        setServiceState(
-            SERVICE_NAME,
-            ServiceState.STARTED
-        )
+        setServiceState(SERVICE_NAME, ServiceState.STARTED)
 
-        Log.d(
-            TAG,
-            "startAction: Started"
-        )
+        Log.d(TAG, "startAction: Started")
 
         init()
 
@@ -323,37 +367,23 @@ class RunningActionService: Service(), SensorEventListener {
             }
         }
 
-        linearAccelerationSensor?.let { stepCounterSensor ->
-            sensorManager?.registerListener(
-                this,
-                stepCounterSensor,
-                SensorManager.SENSOR_DELAY_NORMAL
-            )
-        }
-
         locationCallback = object: LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
                 locationResult.lastLocation?.let { location ->
-                    Log.d(
-                        TAG,
-                        "locationCallback: received location"
-                    )
+                    Log.d(TAG, "locationCallback: received location")
 
                     serviceScope.launch {
-                        if (runActionId == null) {
-                            runActionId = insertRunActionEntityUseCase(
-                                RunActionEntity()
+                        // we don't batch as having many active run actions is not expected
+                        activeRunActionIdList.forEach { entityId ->
+                            val entity = GpsEntity(
+                                runActionId = entityId,
+                                location = Point(location.latitude, location.longitude),
+                                accuracy = location.accuracy,
+                                speed = location.speed * 3.6f, // parse to kmh
                             )
+
+                            insertGpsEntityUseCase(entity)
                         }
-
-                        val entity = GpsEntity(
-                            runActionId = runActionId!!,
-                            location = Point(location.latitude, location.longitude),
-                            accuracy = location.accuracy,
-                            speed = location.speed * 3.6f, // parse to kmh
-                        )
-
-                        insertGpsEntityUseCase(entity)
                     }
                 }
             }
@@ -368,50 +398,34 @@ class RunningActionService: Service(), SensorEventListener {
         }
     }
 
-    private fun stopAction() {
-        Log.d(
-            TAG,
-            "stopAction: Stopping the service"
-        )
+    /**
+     * Deactivates specified [runActionId] and stops the service if none are active
+     * @param runActionId id of the run action to deactivate, [UNDEFINED_RUN_ACTION_ID] to stop all
+     */
+    private fun stopAction(runActionId: Long) {
+        deactivateRunAction(runActionId).invokeOnCompletion {
+            if (activeRunActionIdList.isEmpty()) {
+                Log.d(TAG, "stopAction: No active run actions")
 
-        stop()
+                stop()
+            }
+        }
     }
 
+    /**
+     * Unsubscribes from the sensor updates and stops the service
+     */
     private fun stop() {
-        Log.d(
-            TAG,
-            "stop: Stopping the service"
-        )
+        Log.d(TAG, "stop: Stopping the service")
 
-        setServiceState(
-            SERVICE_NAME,
-            ServiceState.STOPPED
-        )
+        setServiceState(SERVICE_NAME, ServiceState.STOPPED)
 
         try {
-            serviceScope.launch {
-                stepsId?.let { stepsId ->
-                    setStepsEndTimestampUseCase(stepsId, Calendar.getInstance().timeInMillis)
-                }
+            ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
 
-                runActionId?.let { runActionId ->
-                    setRunActionEndTimestampUseCase(runActionId, Calendar.getInstance().timeInMillis)
-                }
-            }.invokeOnCompletion {
-                fusedLocationClient.removeLocationUpdates(locationCallback!!)
-
-                ServiceCompat.stopForeground(
-                    this,
-                    ServiceCompat.STOP_FOREGROUND_REMOVE
-                )
-
-                stopSelf()
-            }
+            stopSelf()
         } catch (e: Exception) {
-            Log.d(
-                TAG,
-                "stop: Service stopped without being started: ${e.message}"
-            )
+            Log.d(TAG, "stop: Service stopped without being started: ${e.message}")
         }
     }
 
@@ -421,10 +435,7 @@ class RunningActionService: Service(), SensorEventListener {
      * Has to be called before any notifications can be posted
      */
     private fun createNotificationChannel() {
-        Log.d(
-            TAG,
-            "createNotificationChannel: creating"
-        )
+        Log.d(TAG, "createNotificationChannel: creating")
 
         val notificationManager = NotificationManagerCompat.from(applicationContext)
 
@@ -437,10 +448,7 @@ class RunningActionService: Service(), SensorEventListener {
      * Changes the name and the description to current locale
      */
     private fun updateNotificationChannel() {
-        Log.d(
-            TAG,
-            "updateNotificationChannel: updating"
-        )
+        Log.d(TAG, "updateNotificationChannel: updating")
 
         val notificationManager = NotificationManagerCompat.from(applicationContext)
 
@@ -451,10 +459,7 @@ class RunningActionService: Service(), SensorEventListener {
      * @return notification channel for the service
      */
     private fun makeNotificationChannel(): NotificationChannelCompat {
-        Log.d(
-            TAG,
-            "makeNotificationChannel: making"
-        )
+        Log.d(TAG, "makeNotificationChannel: making")
 
         return NotificationChannelCompat.Builder(
             NOTIFICATION_CHANNEL_ID,
@@ -474,10 +479,7 @@ class RunningActionService: Service(), SensorEventListener {
      * @return the initial notification
      */
     private fun createNotification(): Notification {
-        Log.d(
-            TAG,
-            "createNotification: creating"
-        )
+        Log.d(TAG, "createNotification: creating")
 
         val pendingIntent: PendingIntent = Intent(
             this,
@@ -525,99 +527,56 @@ class RunningActionService: Service(), SensorEventListener {
             .build()
     }
 
-    val startAccelerationBuffer: MutableList<FloatArray> = mutableListOf()
-    var calibrated = false
-    var xCalibrationAverage: Float = 0f
-    var yCalibrationAverage: Float = 0f
-    var zCalibrationAverage: Float = 0f
-
-    var xCalibrationLowPassOffset: Float = 0f
-    var yCalibrationLowPassOffset: Float = 0f
-    var zCalibrationLowPassOffset: Float = 0f
-
     override fun onSensorChanged(sensorEvent: SensorEvent?) {
         // location defined in start
         sensorEvent?.let { event ->
             when (event.sensor.type) {
-                Sensor.TYPE_LINEAR_ACCELERATION -> {
-                    if (startAccelerationBuffer.size != 100) {
-                        startAccelerationBuffer.add(event.values)
-                        return
-                    } else if (!calibrated) {
-                        xCalibrationAverage =
-                            startAccelerationBuffer.sumOf { it[0].toDouble() }
-                                .div(startAccelerationBuffer.size)
-                                .toFloat()
-                        yCalibrationAverage =
-                            startAccelerationBuffer.sumOf { it[1].toDouble() }
-                                .div(startAccelerationBuffer.size)
-                                .toFloat()
-                        zCalibrationAverage =
-                            startAccelerationBuffer.sumOf { it[2].toDouble() }
-                                .div(startAccelerationBuffer.size)
-                                .toFloat()
-
-                        xCalibrationLowPassOffset =
-                            (startAccelerationBuffer.maxOf { it[0].absoluteValue } - xCalibrationAverage).absoluteValue * 1.2f
-                        yCalibrationLowPassOffset =
-                            (startAccelerationBuffer.maxOf { it[1].absoluteValue } - yCalibrationAverage).absoluteValue * 1.2f
-                        zCalibrationLowPassOffset =
-                            (startAccelerationBuffer.maxOf { it[2].absoluteValue } - zCalibrationAverage).absoluteValue * 1.2f
-
-                        xCalibrationLowPassOffset = xCalibrationLowPassOffset.coerceAtLeast(1f / 3.6f)
-                        yCalibrationLowPassOffset = yCalibrationLowPassOffset.coerceAtLeast(1f / 3.6f)
-                        zCalibrationLowPassOffset = zCalibrationLowPassOffset.coerceAtLeast(1f / 3.6f)
-
-                        calibrated = true
-                    }
-
-                    var x = event.values[0] - xCalibrationAverage
-                    var y = event.values[1] - yCalibrationAverage
-                    var z = event.values[2] - zCalibrationAverage
-
-                    x = if (x.absoluteValue - xCalibrationLowPassOffset < 0f) 0f else x
-                    y = if (y.absoluteValue - yCalibrationLowPassOffset < 0f) 0f else y
-                    z = if (z.absoluteValue - zCalibrationLowPassOffset < 0f) 0f else z
-
-                    val total = sqrt(x.pow(2) + y.pow(2) + z.pow(2))
-
-                    Log.d(
-                        TAG,
-                        "x: ${"%.2f".format(x * 3.6f)} m/s2 | y: ${"%.2f".format(y * 3.6f)} m/s2 | z: ${"%.2f".format(z * 3.6f)} m/s2 | total: ${
-                            "%.2f".format(total * 3.6f)
-                        } m/s2"
-                    )
-                }
-
                 Sensor.TYPE_STEP_COUNTER -> {
-                    Log.d(
-                        TAG,
-                        "stepsCallback: receiving data"
-                    )
+                    Log.d(TAG, "stepsCallback: receiving data")
 
                     val steps = event.values.lastOrNull()?.toLong() ?: return
 
-                    Log.d(
-                        TAG,
-                        "stepsCallback: received $steps"
-                    )
+                    if (stepsStartCount == null) {
+                        stepsStartCount = steps
+                    }
+
+                    val additionalSteps = steps - stepsStartCount!!
+                    stepsStartCount = steps
+
+                    Log.d(TAG, "stepsCallback: received $steps, incremented by $additionalSteps")
 
                     serviceScope.launch {
-                        if (runActionId == null) {
-                            runActionId = insertRunActionEntityUseCase(
-                                RunActionEntity()
-                            )
-                        }
+                        // we don't batch as having many active run actions is not expected
+                        activeRunActionIdList.forEach { entityId ->
+                            @Suppress("LocalVariableName")
+                            val _tmp_lastSteps = getLastStepsEntityForRunActionUseCase(entityId)
 
-                        if (stepsId == null) {
-                            stepsId = insertStepsEntityUseCase(
-                                StepsEntity(runActionId = runActionId!!)
-                            )
+                            if (_tmp_lastSteps == null) {
+                                Log.d(
+                                    TAG,
+                                    "stepsCallback: inserting new steps entity for run action $entityId, no previous entity"
+                                )
+                                insertStepsEntityUseCase(StepsEntity(entityId))
+                            } else if (_tmp_lastSteps.endTimestamp != null) {
+                                Log.d(
+                                    TAG,
+                                    "stepsCallback: inserting new steps entity for run action $entityId, previous entity marked as finished"
+                                )
+                                insertStepsEntityUseCase(StepsEntity(entityId))
+                            }
 
-                            stepsStartCount = steps
-                        } else {
-                            stepsId?.let {
-                                setStepsCountUseCase(it, steps - stepsStartCount!!)
+                            val lastSteps = getLastStepsEntityForRunActionUseCase(entityId)
+                            if (lastSteps == null) {
+                                Log.e(TAG, "stepsCallback: last steps for run action $entityId is null")
+                            } else if (lastSteps.endTimestamp != null) {
+                                Log.e(
+                                    TAG,
+                                    "stepsCallback: last steps for run action $entityId is marked as finished but is being updated"
+                                )
+                            }
+
+                            lastSteps?.let {
+                                setStepsCountUseCase(it.id, it.steps + additionalSteps)
                             }
                         }
                     }
@@ -671,6 +630,8 @@ class RunningActionService: Service(), SensorEventListener {
         const val SERVICE_NOTIFICATION_ID = 1
         const val NOTIFICATION_CHANNEL_ID = TAG
 
+        const val RUN_ACTION_KEY = "runactionkey"
+        const val UNDEFINED_RUN_ACTION_ID = Long.MIN_VALUE
 
         val locationRequest = LocationRequest.Builder(
             Priority.PRIORITY_HIGH_ACCURACY,
@@ -681,15 +642,19 @@ class RunningActionService: Service(), SensorEventListener {
         /**
          * Helper function to start the service
          * @param context context
+         * @param runActionId id of the run action to start
          */
         fun start(
             context: Context,
+            runActionId: Long
         ) {
             Intent(
                 context,
                 RunningActionService::class.java
             ).also { intent ->
                 intent.action = RunningActionServiceActions.START.name
+
+                intent.putExtra(RUN_ACTION_KEY, runActionId)
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     context.startForegroundService(intent)
@@ -702,17 +667,23 @@ class RunningActionService: Service(), SensorEventListener {
         /**
          * Helper function to stop the service
          * @param context context
+         * @param runActionId id of the run action to stop, null to stop all
          */
         fun stop(
             context: Context,
+            runActionId: Long?
         ) {
             Intent(
                 context,
                 RunningActionService::class.java
-            ).also {
-                it.action = RunningActionServiceActions.STOP.name
+            ).also { intent ->
+                intent.action = RunningActionServiceActions.STOP.name
 
-                context.startService(it)
+                runActionId?.let {
+                    intent.putExtra(RUN_ACTION_KEY, it)
+                }
+
+                context.startService(intent)
             }
         }
     }

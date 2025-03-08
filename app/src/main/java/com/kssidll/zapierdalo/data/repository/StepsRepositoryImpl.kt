@@ -26,4 +26,8 @@ class StepsRepositoryImpl(private val dao: StepsDao): StepsRepository {
 
     // Read
 
+    override suspend fun getLastEntityForRunAction(runActionId: Long): StepsEntity? {
+        return dao.getLastEntityForRunAction(runActionId)
+    }
+
 }

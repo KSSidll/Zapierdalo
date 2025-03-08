@@ -8,15 +8,19 @@ import javax.inject.Inject
 class StartRunningActionServiceUseCase @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
-    operator fun invoke() {
-        RunningActionService.start(context)
+    operator fun invoke(
+        runActionId: Long
+    ) {
+        RunningActionService.start(context, runActionId)
     }
 }
 
 class StopRunningActionServiceUseCase @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
-    operator fun invoke() {
-        RunningActionService.stop(context)
+    operator fun invoke(
+        runActionId: Long? = null
+    ) {
+        RunningActionService.stop(context, runActionId)
     }
 }

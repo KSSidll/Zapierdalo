@@ -8,12 +8,19 @@ import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
 class InsertStepsEntityUseCase @Inject constructor(
+    private val getLastStepsEntityForRunActionUseCase: GetLastStepsEntityForRunActionUseCase,
     private val stepsRepository: StepsRepository
 ) {
     suspend operator fun invoke(
         entity: StepsEntity,
         dispatcher: CoroutineContext = Dispatchers.IO
     ) = withContext(dispatcher) {
+        // ensure previous entity in the chain 'finished'
+        val lastEntity = getLastStepsEntityForRunActionUseCase(entity.runActionId)
+        if (lastEntity != null && lastEntity.endTimestamp == null) {
+            stepsRepository.setEndTimestamp(lastEntity.id, entity.startTimestamp - 1)
+        }
+
         stepsRepository.insert(entity)
     }
 }
