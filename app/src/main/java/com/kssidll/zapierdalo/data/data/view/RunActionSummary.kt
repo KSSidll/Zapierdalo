@@ -8,7 +8,7 @@ import androidx.room.SkipQueryVerification
     """
         SELECT
             id,
-            ST_Length(path) AS totalDistance,
+            ST_Length(path, 1) AS totalDistance,
             totalSteps,
             startTimestamp,
             endTimestamp

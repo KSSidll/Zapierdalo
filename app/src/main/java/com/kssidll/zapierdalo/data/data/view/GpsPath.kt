@@ -12,7 +12,7 @@ import co.anbora.labs.spatia.geometry.LineString
             runActionId, 
             ST_Simplify(
                 MakeLine(location),
-                5 -- 5 meters tolerance for simplification
+                0.000009 -- ~1 meter tolerance
             ) AS path
         FROM GpsEntity
         GROUP BY runActionId

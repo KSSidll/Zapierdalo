@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "77f2f5fd76bb63876f207a635cd8f90c",
+    "identityHash": "0442ff983cb6deb24e698ecbf1b3c0eb",
     "entities": [
       {
         "tableName": "StepsEntity",
@@ -202,7 +202,7 @@
       },
       {
         "viewName": "GpsPath",
-        "createSql": "CREATE VIEW `${VIEW_NAME}` AS -- build a simplified linestring from all gps per run action\n        SELECT \n            runActionId, \n            ST_Simplify(\n                MakeLine(location),\n                5 -- 5 meters tolerance for simplification\n            ) AS path\n        FROM GpsEntity\n        GROUP BY runActionId\n        ORDER BY id ASC"
+        "createSql": "CREATE VIEW `${VIEW_NAME}` AS -- build a simplified linestring from all gps per run action\n        SELECT \n            runActionId, \n            ST_Simplify(\n                MakeLine(location),\n                0.000009 -- ~1 meter tolerance\n            ) AS path\n        FROM GpsEntity\n        GROUP BY runActionId\n        ORDER BY id ASC"
       },
       {
         "viewName": "RunAction",
@@ -210,12 +210,12 @@
       },
       {
         "viewName": "RunActionSummary",
-        "createSql": "CREATE VIEW `${VIEW_NAME}` AS SELECT\n            id,\n            ST_Length(path) AS totalDistance,\n            totalSteps,\n            startTimestamp,\n            endTimestamp\n        FROM RunAction"
+        "createSql": "CREATE VIEW `${VIEW_NAME}` AS SELECT\n            id,\n            ST_Length(path, 1) AS totalDistance,\n            totalSteps,\n            startTimestamp,\n            endTimestamp\n        FROM RunAction"
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '77f2f5fd76bb63876f207a635cd8f90c')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0442ff983cb6deb24e698ecbf1b3c0eb')"
     ]
   }
 }
