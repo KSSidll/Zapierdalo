@@ -16,7 +16,9 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Build
+import android.os.HandlerThread
 import android.os.IBinder
+import android.os.Process
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.IntentSenderRequest
@@ -35,7 +37,11 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.android.gms.common.api.ResolvableApiException
+import com.google.android.gms.location.DeviceOrientation
+import com.google.android.gms.location.DeviceOrientationListener
+import com.google.android.gms.location.DeviceOrientationRequest
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.FusedOrientationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
@@ -65,6 +71,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.util.Calendar
+import java.util.concurrent.Executors
 import javax.inject.Inject
 
 /**
@@ -144,6 +151,8 @@ class RunningActionService: Service(), SensorEventListener {
 
     private lateinit var serviceJob: Job
     private lateinit var serviceScope: CoroutineScope
+
+    private val locationThread = HandlerThread(LOCATION_THREAD_NAME, Process.THREAD_PRIORITY_MORE_FAVORABLE)
 
     private var sensorManager: SensorManager? = null
 
@@ -242,8 +251,11 @@ class RunningActionService: Service(), SensorEventListener {
     }
 
     override fun onDestroy() {
-        Log.d(TAG, "onDestroy: Removing location updates")
-        fusedLocationClient.removeLocationUpdates(locationCallback!!)
+        locationCallback?.let {
+            Log.d(TAG, "onDestroy: Removing location updates")
+            locationThread.quitSafely()
+            fusedLocationClient.removeLocationUpdates(it)
+        }
 
         Log.d(TAG, "onDestroy: Unregistering sensor listeners")
         unregisterReceiver(localeChangeReceiver)
@@ -390,11 +402,17 @@ class RunningActionService: Service(), SensorEventListener {
         }
 
         if (checkPermission(applicationContext, Permissions.LOCATION.asList())) {
-            fusedLocationClient.requestLocationUpdates(
-                locationRequest,
-                locationCallback!!,
-                mainLooper
-            )
+            locationCallback?.let { callback ->
+                try { // ignore exception if thread somehow starts more than once
+                    locationThread.start()
+                } catch (_: IllegalThreadStateException) {}
+
+                fusedLocationClient.requestLocationUpdates(
+                    locationRequest,
+                    callback,
+                    locationThread.looper
+                )
+            }
         }
     }
 
@@ -633,6 +651,7 @@ class RunningActionService: Service(), SensorEventListener {
         const val RUN_ACTION_KEY = "runactionkey"
         const val UNDEFINED_RUN_ACTION_ID = Long.MIN_VALUE
 
+        const val LOCATION_THREAD_NAME = "locationthreadname"
         val locationRequest = LocationRequest.Builder(
             Priority.PRIORITY_HIGH_ACCURACY,
             1000
