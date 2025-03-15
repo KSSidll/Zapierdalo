@@ -15,6 +15,7 @@ import co.anbora.labs.spatia.geometry.LineString
                 0.000009 -- ~1 meter tolerance
             ) AS path
         FROM GpsEntity
+        WHERE accuracy < 9 -- ignore readings with higher than 9 meters inaccuracy at 1 sigma 
         GROUP BY runActionId
         ORDER BY id ASC
     """,
