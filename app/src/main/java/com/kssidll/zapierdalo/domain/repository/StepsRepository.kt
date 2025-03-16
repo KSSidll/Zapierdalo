@@ -13,20 +13,8 @@ interface StepsRepository {
 
     // Update
 
-    /**
-     * Set end timestamp of entity matching id = [entityId] to [endTimestamp]
-     */
-    suspend fun setEndTimestamp(entityId: Long, endTimestamp: Long?)
-
-    /**
-     * Set steps count of entity matching id = [entityId] to [count]
-     */
-    suspend fun setStepsCount(entityId: Long, count: Long)
-
     // Delete
 
     // Read
-
-    suspend fun getLastEntityForRunAction(runActionId: Long): StepsEntity?
 
 }

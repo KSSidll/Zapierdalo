@@ -8,7 +8,6 @@ import androidx.room.SkipQueryVerification
     """
         SELECT
             id,
-            ST_Length(path, 1) AS totalDistance,
             totalSteps,
             startTimestamp,
             endTimestamp
@@ -18,7 +17,6 @@ import androidx.room.SkipQueryVerification
 )
 data class RunActionSummary(
     val id: Long,
-    val totalDistance: Double,
     val totalSteps: Long,
     val startTimestamp: Long,
     val endTimestamp: Long?

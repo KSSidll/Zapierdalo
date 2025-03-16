@@ -14,20 +14,8 @@ class StepsRepositoryImpl(private val dao: StepsDao): StepsRepository {
 
     // Update
 
-    override suspend fun setEndTimestamp(entityId: Long, endTimestamp: Long?) {
-        dao.setEndTimestamp(entityId, endTimestamp)
-    }
-
-    override suspend fun setStepsCount(entityId: Long, count: Long) {
-        dao.setStepsCount(entityId, count)
-    }
-
     // Delete
 
     // Read
-
-    override suspend fun getLastEntityForRunAction(runActionId: Long): StepsEntity? {
-        return dao.getLastEntityForRunAction(runActionId)
-    }
 
 }

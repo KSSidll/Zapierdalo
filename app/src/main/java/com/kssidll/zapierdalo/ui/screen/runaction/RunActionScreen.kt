@@ -25,10 +25,10 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.viewinterop.AndroidView
 import com.kssidll.zapierdalo.R
-import com.kssidll.zapierdalo.domain.data.toGeoPointList
 import com.kssidll.zapierdalo.helper.orPointZero
 import com.kssidll.zapierdalo.ui.component.SecondaryAppBar
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Polyline
@@ -52,7 +52,9 @@ fun RunActionScreen(
 
     var sfpo: SimpleFastPointOverlay? by remember { mutableStateOf(null) }
 
-    val gpsPoints = uiState.runAction?.path?.toGeoPointList().orEmpty()
+    // TODO Reimplement
+    //val gpsPoints = uiState.runAction?.path?.toGeoPointList().orEmpty()
+    val gpsPoints = emptyList<GeoPoint>()
 
     LaunchedEffect(mapView, uiState.runAction, gpsPoints) {
         if (uiState.runAction != null) {

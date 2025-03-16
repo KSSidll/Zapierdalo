@@ -144,15 +144,18 @@ fun DashboardRunsScreen(
                                 ) {
                                     val textStyle = Typography.labelLarge
 
-                                    val distance =
-                                        if (runAction.totalDistance >= 1000.0) {
-                                            Pair(
-                                                "%.1f".format((runAction.totalDistance.toLong() / 100).toDouble() / 10),
-                                                "km"
-                                            )
-                                        } else {
-                                            Pair("${runAction.totalDistance.toLong()}", "m")
-                                        }
+                                    //val distance =
+                                    //    if (runAction.totalDistance >= 1000.0) {
+                                    //        Pair(
+                                    //            "%.1f".format((runAction.totalDistance.toLong() / 100).toDouble() / 10),
+                                    //            "km"
+                                    //        )
+                                    //    } else {
+                                    //        Pair("${runAction.totalDistance.toLong()}", "m")
+                                    //    }
+
+                                    // TODO Reimplement
+                                    val distance = Pair("test", " na")
 
                                     var endTime by remember {
                                         mutableLongStateOf(

@@ -32,16 +32,11 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
-import co.anbora.labs.spatia.geometry.Point
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.android.gms.common.api.ResolvableApiException
-import com.google.android.gms.location.DeviceOrientation
-import com.google.android.gms.location.DeviceOrientationListener
-import com.google.android.gms.location.DeviceOrientationRequest
 import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.FusedOrientationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
@@ -55,13 +50,8 @@ import com.kssidll.zapierdalo.broadcast.RunningActionServiceStopActionReceiver
 import com.kssidll.zapierdalo.data.data.GpsEntity
 import com.kssidll.zapierdalo.data.data.StepsEntity
 import com.kssidll.zapierdalo.domain.usecase.gps.InsertGpsEntityUseCase
-import com.kssidll.zapierdalo.domain.usecase.runaction.GetRunActionUseCase
-import com.kssidll.zapierdalo.domain.usecase.runaction.InsertRunActionEntityUseCase
 import com.kssidll.zapierdalo.domain.usecase.runaction.SetRunActionEndTimestampUseCase
-import com.kssidll.zapierdalo.domain.usecase.steps.GetLastStepsEntityForRunActionUseCase
 import com.kssidll.zapierdalo.domain.usecase.steps.InsertStepsEntityUseCase
-import com.kssidll.zapierdalo.domain.usecase.steps.SetStepsCountUseCase
-import com.kssidll.zapierdalo.domain.usecase.steps.SetStepsEndTimestampUseCase
 import com.kssidll.zapierdalo.helper.checkPermission
 import com.kssidll.zapierdalo.helper.getLocalizedString
 import com.kssidll.zapierdalo.service.RunningActionService.Companion.UNDEFINED_RUN_ACTION_ID
@@ -71,7 +61,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.util.Calendar
-import java.util.concurrent.Executors
 import javax.inject.Inject
 
 /**
@@ -160,25 +149,10 @@ class RunningActionService: Service(), SensorEventListener {
     lateinit var insertGpsEntityUseCase: InsertGpsEntityUseCase
 
     @Inject
-    lateinit var insertRunActionEntityUseCase: InsertRunActionEntityUseCase
-
-    @Inject
-    lateinit var getRunActionEntityUseCase: GetRunActionUseCase
-
-    @Inject
     lateinit var setRunActionEndTimestampUseCase: SetRunActionEndTimestampUseCase
 
     @Inject
-    lateinit var getLastStepsEntityForRunActionUseCase: GetLastStepsEntityForRunActionUseCase
-
-    @Inject
     lateinit var insertStepsEntityUseCase: InsertStepsEntityUseCase
-
-    @Inject
-    lateinit var setStepsEndTimestampUseCase: SetStepsEndTimestampUseCase
-
-    @Inject
-    lateinit var setStepsCountUseCase: SetStepsCountUseCase
 
     private var activeRunActionIdList: MutableList<Long> = mutableListOf()
     private var stepsStartCount: Long? = null
@@ -317,11 +291,7 @@ class RunningActionService: Service(), SensorEventListener {
             if (runActionId == UNDEFINED_RUN_ACTION_ID) {
                 Log.d(TAG, "stopAction: Deactivating all run actions")
 
-                // TODO refactor steps entity handling and update here
                 activeRunActionIdList.forEach { entityId ->
-                    getLastStepsEntityForRunActionUseCase(entityId)?.let { lastStepsEntity ->
-                        setStepsEndTimestampUseCase(lastStepsEntity.id, endTimestamp)
-                    }
                     setRunActionEndTimestampUseCase(entityId, endTimestamp)
                 }
 
@@ -332,9 +302,6 @@ class RunningActionService: Service(), SensorEventListener {
                 if (wasDeactivated) {
                     Log.d(TAG, "stopAction: Deactivating run action $runActionId")
 
-                    getLastStepsEntityForRunActionUseCase(runActionId)?.let { lastStepsEntity ->
-                        setStepsEndTimestampUseCase(lastStepsEntity.id, endTimestamp)
-                    }
                     setRunActionEndTimestampUseCase(runActionId, endTimestamp)
                 } else {
                     Log.d(TAG, "stopAction: Tried to deactivate run action $runActionId, but it's not active")
@@ -389,7 +356,9 @@ class RunningActionService: Service(), SensorEventListener {
                         activeRunActionIdList.forEach { entityId ->
                             val entity = GpsEntity(
                                 runActionId = entityId,
-                                location = Point(location.latitude, location.longitude),
+                                latitude = location.latitude,
+                                longitude = location.longitude,
+                                altitude = location.altitude,
                                 accuracy = location.accuracy,
                                 speed = location.speed * 3.6f, // parse to kmh
                             )
@@ -405,7 +374,8 @@ class RunningActionService: Service(), SensorEventListener {
             locationCallback?.let { callback ->
                 try { // ignore exception if thread somehow starts more than once
                     locationThread.start()
-                } catch (_: IllegalThreadStateException) {}
+                } catch (_: IllegalThreadStateException) {
+                }
 
                 fusedLocationClient.requestLocationUpdates(
                     locationRequest,
@@ -563,39 +533,19 @@ class RunningActionService: Service(), SensorEventListener {
 
                     Log.d(TAG, "stepsCallback: received $steps, incremented by $additionalSteps")
 
+                    if (additionalSteps == 0L) return // early return if no new steps to be recorded
+
                     serviceScope.launch {
-                        // we don't batch as having many active run actions is not expected
                         activeRunActionIdList.forEach { entityId ->
-                            @Suppress("LocalVariableName")
-                            val _tmp_lastSteps = getLastStepsEntityForRunActionUseCase(entityId)
+                            val entity = StepsEntity(
+                                runActionId = entityId,
+                                steps = additionalSteps
+                            )
 
-                            if (_tmp_lastSteps == null) {
-                                Log.d(
-                                    TAG,
-                                    "stepsCallback: inserting new steps entity for run action $entityId, no previous entity"
-                                )
-                                insertStepsEntityUseCase(StepsEntity(entityId))
-                            } else if (_tmp_lastSteps.endTimestamp != null) {
-                                Log.d(
-                                    TAG,
-                                    "stepsCallback: inserting new steps entity for run action $entityId, previous entity marked as finished"
-                                )
-                                insertStepsEntityUseCase(StepsEntity(entityId))
-                            }
+                            Log.d(TAG, "stepsCallback: adding steps to run action $entityId")
 
-                            val lastSteps = getLastStepsEntityForRunActionUseCase(entityId)
-                            if (lastSteps == null) {
-                                Log.e(TAG, "stepsCallback: last steps for run action $entityId is null")
-                            } else if (lastSteps.endTimestamp != null) {
-                                Log.e(
-                                    TAG,
-                                    "stepsCallback: last steps for run action $entityId is marked as finished but is being updated"
-                                )
-                            }
-
-                            lastSteps?.let {
-                                setStepsCountUseCase(it.id, it.steps + additionalSteps)
-                            }
+                            // TODO this should be batched since we update the shadow for every insert
+                            insertStepsEntityUseCase(entity)
                         }
                     }
                 }

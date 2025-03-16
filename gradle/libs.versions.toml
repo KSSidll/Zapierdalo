@@ -20,9 +20,6 @@ google-hilt-navigation-compose = "1.2.0"
 # Room
 androidx-room = "2.6.1"
 
-# Spatia Room
-dev-anboralabs-room-spatia = "0.3.0"
-
 # Helpers
 accompanist = "0.37.2"
 
@@ -76,9 +73,6 @@ google-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigat
 androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "androidx-room" }
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "androidx-room" }
 androidx-room-paging = { group = "androidx.room", name = "room-paging", version.ref = "androidx-room" }
-
-# Spatia Room
-dev-anboralabs-room-spatia = { group = "com.github.anboralabs", name = "spatia-room", version.ref = "dev-anboralabs-room-spatia" }
 
 # Helpers
 google-accompanist = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "accompanist" }
