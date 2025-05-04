@@ -1,6 +1,7 @@
 package com.kssidll.zapierdalo.data.data
 
 import androidx.room.Entity
+import androidx.room.ForeignKey
 import androidx.room.Ignore
 import androidx.room.Index
 import androidx.room.PrimaryKey
@@ -9,6 +10,14 @@ import java.util.Calendar
 @Entity(
     indices = [
         Index(value = ["runActionId"])
+    ],
+    foreignKeys = [
+        ForeignKey(
+            entity = RunActionEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["runActionId"],
+            onDelete = ForeignKey.CASCADE
+        )
     ],
     tableName = "StepsEntity"
 )

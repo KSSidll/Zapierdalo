@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "19b0122f2989666dc13a84a89d75885e",
+    "identityHash": "4da9b9ffe31479a7177b2897bd5b7721",
     "entities": [
       {
         "tableName": "StepsEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `runActionId` INTEGER NOT NULL, `steps` INTEGER NOT NULL, `timestamp` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `runActionId` INTEGER NOT NULL, `steps` INTEGER NOT NULL, `timestamp` INTEGER NOT NULL, FOREIGN KEY(`runActionId`) REFERENCES `RunActionEntity`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
@@ -49,6 +49,19 @@
             "orders": [],
             "createSql": "CREATE INDEX IF NOT EXISTS `index_StepsEntity_runActionId` ON `${TABLE_NAME}` (`runActionId`)"
           }
+        ],
+        "foreignKeys": [
+          {
+            "table": "RunActionEntity",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "runActionId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
         ]
       },
       {
@@ -83,7 +96,7 @@
       },
       {
         "tableName": "GpsEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `runActionId` INTEGER NOT NULL, `latitude` REAL NOT NULL, `longitude` REAL NOT NULL, `altitude` REAL NOT NULL, `accuracy` REAL NOT NULL, `speed` REAL NOT NULL, `timestamp` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `runActionId` INTEGER NOT NULL, `latitude` REAL NOT NULL, `longitude` REAL NOT NULL, `altitude` REAL NOT NULL, `accuracy` REAL NOT NULL, `speed` REAL NOT NULL, `timestamp` INTEGER NOT NULL, FOREIGN KEY(`runActionId`) REFERENCES `RunActionEntity`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
@@ -159,6 +172,19 @@
             ],
             "orders": [],
             "createSql": "CREATE INDEX IF NOT EXISTS `index_GpsEntity_runActionId_id` ON `${TABLE_NAME}` (`runActionId`, `id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "RunActionEntity",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "runActionId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
           }
         ]
       },
@@ -245,7 +271,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '19b0122f2989666dc13a84a89d75885e')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4da9b9ffe31479a7177b2897bd5b7721')"
     ]
   }
 }
