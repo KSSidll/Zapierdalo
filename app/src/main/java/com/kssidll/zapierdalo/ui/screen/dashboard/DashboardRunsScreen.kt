@@ -60,8 +60,6 @@ fun DashboardRunsScreen(
                 .consumeWindowInsets(innerPaddingValues)
                 .fillMaxSize()
         ) {
-            // TODO display total distance run and such stats
-
             items(
                 count = runActionList.itemCount,
                 key = { index ->
@@ -144,18 +142,15 @@ fun DashboardRunsScreen(
                                 ) {
                                     val textStyle = Typography.labelLarge
 
-                                    //val distance =
-                                    //    if (runAction.totalDistance >= 1000.0) {
-                                    //        Pair(
-                                    //            "%.1f".format((runAction.totalDistance.toLong() / 100).toDouble() / 10),
-                                    //            "km"
-                                    //        )
-                                    //    } else {
-                                    //        Pair("${runAction.totalDistance.toLong()}", "m")
-                                    //    }
-
-                                    // TODO Reimplement
-                                    val distance = Pair("test", " na")
+                                    val distance =
+                                        if (runAction.totalLength >= 1000.0) {
+                                            Pair(
+                                                "%.1f".format((runAction.totalLength.toLong() / 100).toDouble() / 10),
+                                                "km"
+                                            )
+                                        } else {
+                                            Pair("${runAction.totalLength.toLong()}", "m")
+                                        }
 
                                     var endTime by remember {
                                         mutableLongStateOf(

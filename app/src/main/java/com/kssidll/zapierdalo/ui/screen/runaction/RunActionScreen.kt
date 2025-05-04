@@ -26,6 +26,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.viewinterop.AndroidView
 import com.kssidll.zapierdalo.R
 import com.kssidll.zapierdalo.helper.orPointZero
+import com.kssidll.zapierdalo.helper.toGeoPoint
 import com.kssidll.zapierdalo.ui.component.SecondaryAppBar
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
@@ -52,11 +53,7 @@ fun RunActionScreen(
 
     var sfpo: SimpleFastPointOverlay? by remember { mutableStateOf(null) }
 
-    // TODO Reimplement
-    //val gpsPoints = uiState.runAction?.path?.toGeoPointList().orEmpty()
-    val gpsPoints = emptyList<GeoPoint>()
-
-    LaunchedEffect(mapView, uiState.runAction, gpsPoints) {
+    LaunchedEffect(mapView, uiState.runAction, uiState.path) {
         if (uiState.runAction != null) {
             mapView?.let { mapView ->
                 if (!mapViewInitialZoomSet) {
@@ -64,23 +61,23 @@ fun RunActionScreen(
                     mapViewInitialZoomSet = true
                 }
 
-                mapView.controller.setCenter(gpsPoints.lastOrNull().orPointZero())
+                mapView.controller.setCenter(uiState.path.lastOrNull().orPointZero())
 
                 if (mapViewPolyline == null || !mapView.overlayManager.contains(mapViewPolyline)) {
                     mapViewPolyline = Polyline().apply {
                         outlinePaint.color = mapViewPolylineColor.toArgb()
-                        setPoints(gpsPoints)
+                        setPoints(uiState.path)
                     }
                     mapView.overlayManager.add(mapViewPolyline)
                 } else {
-                    mapViewPolyline?.setPoints(gpsPoints)
+                    mapViewPolyline?.setPoints(uiState.path)
                 }
 
                 if (sfpo != null) {
                     mapView.overlayManager.remove(sfpo)
                 }
 
-                val pt = SimplePointTheme(gpsPoints)
+                val pt = SimplePointTheme(uiState.path)
                 val opt = SimpleFastPointOverlayOptions.getDefaultStyle()
                     .setAlgorithm(SimpleFastPointOverlayOptions.RenderingAlgorithm.MEDIUM_OPTIMIZATION)
                     .setRadius(5f)

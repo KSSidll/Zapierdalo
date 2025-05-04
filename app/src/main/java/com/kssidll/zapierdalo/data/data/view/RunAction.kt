@@ -5,18 +5,19 @@ import androidx.room.DatabaseView
 @DatabaseView(
     """
         SELECT
-            rae.id,
-            sa.totalSteps,
-            rae.startTimestamp,
-            rae.endTimestamp
-        FROM RunActionEntity rae
-        LEFT JOIN StepsAmountShadow sa ON sa.runActionId = rae.id
+            id,
+            totalSteps,
+            totalLength,
+            startTimestamp,
+            endTimestamp
+        FROM RunActionSummary
     """,
     viewName = "RunAction"
 )
 data class RunAction(
     val id: Long,
     val totalSteps: Long,
+    val totalLength: Double,
     val startTimestamp: Long,
     val endTimestamp: Long?
 )

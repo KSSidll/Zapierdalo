@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "ee2acf8084170a775dfde9e786612e40",
+    "identityHash": "19b0122f2989666dc13a84a89d75885e",
     "entities": [
       {
         "tableName": "StepsEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `runActionId` INTEGER NOT NULL, `timestamp` INTEGER NOT NULL, `steps` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `runActionId` INTEGER NOT NULL, `steps` INTEGER NOT NULL, `timestamp` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -21,14 +21,14 @@
             "notNull": true
           },
           {
-            "fieldPath": "timestamp",
-            "columnName": "timestamp",
+            "fieldPath": "steps",
+            "columnName": "steps",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "steps",
-            "columnName": "steps",
+            "fieldPath": "timestamp",
+            "columnName": "timestamp",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -49,8 +49,7 @@
             "orders": [],
             "createSql": "CREATE INDEX IF NOT EXISTS `index_StepsEntity_runActionId` ON `${TABLE_NAME}` (`runActionId`)"
           }
-        ],
-        "foreignKeys": []
+        ]
       },
       {
         "tableName": "StepsAmountShadow",
@@ -80,9 +79,7 @@
           "columnNames": [
             "id"
           ]
-        },
-        "indices": [],
-        "foreignKeys": []
+        }
       },
       {
         "tableName": "GpsEntity",
@@ -163,8 +160,37 @@
             "orders": [],
             "createSql": "CREATE INDEX IF NOT EXISTS `index_GpsEntity_runActionId_id` ON `${TABLE_NAME}` (`runActionId`, `id`)"
           }
+        ]
+      },
+      {
+        "tableName": "GpsLengthShadow",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `runActionId` INTEGER NOT NULL, `totalLength` REAL NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "runActionId",
+            "columnName": "runActionId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "totalLength",
+            "columnName": "totalLength",
+            "affinity": "REAL",
+            "notNull": true
+          }
         ],
-        "foreignKeys": []
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
       },
       {
         "tableName": "RunActionEntity",
@@ -185,8 +211,7 @@
           {
             "fieldPath": "endTimestamp",
             "columnName": "endTimestamp",
-            "affinity": "INTEGER",
-            "notNull": false
+            "affinity": "INTEGER"
           }
         ],
         "primaryKey": {
@@ -205,23 +230,22 @@
             "orders": [],
             "createSql": "CREATE INDEX IF NOT EXISTS `index_RunActionEntity_id` ON `${TABLE_NAME}` (`id`)"
           }
-        ],
-        "foreignKeys": []
+        ]
       }
     ],
     "views": [
       {
-        "viewName": "RunAction",
-        "createSql": "CREATE VIEW `${VIEW_NAME}` AS SELECT\n            rae.id,\n            sa.totalSteps,\n            rae.startTimestamp,\n            rae.endTimestamp\n        FROM RunActionEntity rae\n        LEFT JOIN StepsAmountShadow sa ON sa.runActionId = rae.id"
+        "viewName": "RunActionSummary",
+        "createSql": "CREATE VIEW `${VIEW_NAME}` AS SELECT\n            rae.id,\n            sa.totalSteps,\n            gl.totalLength,\n            rae.startTimestamp,\n            rae.endTimestamp\n        FROM RunActionEntity rae\n        LEFT JOIN StepsAmountShadow sa ON sa.runActionId = rae.id\n        LEFT JOIN GpsLengthShadow gl on gl.runActionId = rae.id"
       },
       {
-        "viewName": "RunActionSummary",
-        "createSql": "CREATE VIEW `${VIEW_NAME}` AS SELECT\n            id,\n            totalSteps,\n            startTimestamp,\n            endTimestamp\n        FROM RunAction"
+        "viewName": "RunAction",
+        "createSql": "CREATE VIEW `${VIEW_NAME}` AS SELECT\n            id,\n            totalSteps,\n            totalLength,\n            startTimestamp,\n            endTimestamp\n        FROM RunActionSummary"
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ee2acf8084170a775dfde9e786612e40')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '19b0122f2989666dc13a84a89d75885e')"
     ]
   }
 }

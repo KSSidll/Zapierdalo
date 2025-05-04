@@ -1,6 +1,7 @@
 package com.kssidll.zapierdalo.domain.repository
 
 import com.kssidll.zapierdalo.data.data.GpsEntity
+import kotlinx.coroutines.flow.Flow
 
 interface GpsRepository {
 
@@ -14,5 +15,7 @@ interface GpsRepository {
     // Delete
 
     // Read
+
+    fun forRunAction(runActionId: Long): Flow<List<GpsEntity>>
 
 }

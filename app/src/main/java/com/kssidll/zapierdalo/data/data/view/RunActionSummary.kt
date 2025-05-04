@@ -7,17 +7,21 @@ import androidx.room.SkipQueryVerification
 @DatabaseView(
     """
         SELECT
-            id,
-            totalSteps,
-            startTimestamp,
-            endTimestamp
-        FROM RunAction
+            rae.id,
+            sa.totalSteps,
+            gl.totalLength,
+            rae.startTimestamp,
+            rae.endTimestamp
+        FROM RunActionEntity rae
+        LEFT JOIN StepsAmountShadow sa ON sa.runActionId = rae.id
+        LEFT JOIN GpsLengthShadow gl on gl.runActionId = rae.id
     """,
     viewName = "RunActionSummary"
 )
 data class RunActionSummary(
     val id: Long,
     val totalSteps: Long,
+    val totalLength: Double,
     val startTimestamp: Long,
     val endTimestamp: Long?
 )

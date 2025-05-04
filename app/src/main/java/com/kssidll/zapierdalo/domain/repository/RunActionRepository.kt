@@ -45,7 +45,7 @@ interface RunActionRepository {
     fun get(id: Long): Flow<RunAction?>
 
     /**
-     * Returns a flow of [RunAction] object matching [id]
+     * Returns a flow of [RunActionSummary] object matching [id]
      * @param id Id of the object to match with
      */
     fun getSummary(id: Long): Flow<RunActionSummary?>

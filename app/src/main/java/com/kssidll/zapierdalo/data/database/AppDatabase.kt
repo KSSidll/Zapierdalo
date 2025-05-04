@@ -11,6 +11,7 @@ import com.kssidll.zapierdalo.data.dao.StepsDao
 import com.kssidll.zapierdalo.data.data.GpsEntity
 import com.kssidll.zapierdalo.data.data.RunActionEntity
 import com.kssidll.zapierdalo.data.data.StepsEntity
+import com.kssidll.zapierdalo.data.data.shadow.GpsLengthShadow
 import com.kssidll.zapierdalo.data.data.shadow.StepsAmountShadow
 import com.kssidll.zapierdalo.data.data.view.RunAction
 import com.kssidll.zapierdalo.data.data.view.RunActionSummary
@@ -26,6 +27,7 @@ const val DATABASE_NAME: String = APPLICATION_NAME + "_database.db"
         StepsEntity::class,
         StepsAmountShadow::class,
         GpsEntity::class,
+        GpsLengthShadow::class,
         RunActionEntity::class,
     ],
     views = [

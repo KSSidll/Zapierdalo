@@ -8,7 +8,9 @@ import androidx.navigation.toRoute
 import com.kssidll.zapierdalo.NavigationDestinations
 import com.kssidll.zapierdalo.data.data.view.RunAction
 import com.kssidll.zapierdalo.domain.usecase.StopRunningActionServiceUseCase
+import com.kssidll.zapierdalo.domain.usecase.gps.GetGpsForRunActionUseCase
 import com.kssidll.zapierdalo.domain.usecase.runaction.DeleteRunActionUseCase
+import com.kssidll.zapierdalo.domain.usecase.runaction.GetRunActionPathUseCase
 import com.kssidll.zapierdalo.domain.usecase.runaction.GetRunActionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,10 +18,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.osmdroid.util.GeoPoint
 import javax.inject.Inject
 
 data class RunActionUiState(
-    val runAction: RunAction? = null
+    val runAction: RunAction? = null,
+    val path: List<GeoPoint> = emptyList()
 )
 
 sealed class RunActionEvent {
@@ -30,6 +34,7 @@ sealed class RunActionEvent {
 @HiltViewModel
 class RunActionViewModel @Inject constructor(
     private val getRunActionUseCase: GetRunActionUseCase,
+    private val getRunActionPathUseCase: GetRunActionPathUseCase,
     private val deleteRunActionEntityUseCase: DeleteRunActionUseCase,
     private val stopRunningActionServiceUseCase: StopRunningActionServiceUseCase,
     savedStateHandle: SavedStateHandle,
@@ -48,6 +53,16 @@ class RunActionViewModel @Inject constructor(
                 _uiState.update { currentState ->
                     currentState.copy(
                         runAction = it
+                    )
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            getRunActionPathUseCase(runActionEntityId).collect {
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        path = it
                     )
                 }
             }

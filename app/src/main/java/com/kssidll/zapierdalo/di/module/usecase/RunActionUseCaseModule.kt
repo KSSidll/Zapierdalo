@@ -1,8 +1,11 @@
 package com.kssidll.zapierdalo.di.module.usecase
 
+import com.kssidll.zapierdalo.domain.repository.GpsRepository
 import com.kssidll.zapierdalo.domain.repository.RunActionRepository
+import com.kssidll.zapierdalo.domain.usecase.gps.GetGpsForRunActionUseCase
 import com.kssidll.zapierdalo.domain.usecase.runaction.DeleteRunActionUseCase
 import com.kssidll.zapierdalo.domain.usecase.runaction.GetAllPagedRunActionSummaryUseCase
+import com.kssidll.zapierdalo.domain.usecase.runaction.GetRunActionPathUseCase
 import com.kssidll.zapierdalo.domain.usecase.runaction.GetRunActionSummaryUseCase
 import com.kssidll.zapierdalo.domain.usecase.runaction.GetRunActionUseCase
 import com.kssidll.zapierdalo.domain.usecase.runaction.InsertRunActionEntityUseCase
@@ -46,6 +49,14 @@ class RunActionUseCaseModule {
         runActionRepository: RunActionRepository,
     ): GetRunActionUseCase {
         return GetRunActionUseCase(runActionRepository)
+    }
+
+    @Provides
+    @ViewModelScoped
+    fun provideGetRunActionPathUseCase(
+        getGpsForRunActionUseCase: GetGpsForRunActionUseCase
+    ): GetRunActionPathUseCase {
+        return GetRunActionPathUseCase(getGpsForRunActionUseCase)
     }
 
     @Provides

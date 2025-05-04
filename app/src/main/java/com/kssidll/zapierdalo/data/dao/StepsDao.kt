@@ -10,6 +10,7 @@ import com.kssidll.zapierdalo.data.data.shadow.StepsAmountShadow
 @Dao
 interface StepsDao {
     // Shadow
+    // TODO optimise by adding per RunAction separation
 
     @Query(StepsAmountShadow.DELETE_QUERY)
     suspend fun mDeleteShadow()

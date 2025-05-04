@@ -1,8 +1,16 @@
 package com.kssidll.zapierdalo.helper
 
 import androidx.compose.ui.util.fastForEachIndexed
+import com.kssidll.zapierdalo.data.data.GpsEntity
 import org.osmdroid.util.GeoPoint
 
+fun GpsEntity.toGeoPoint(): GeoPoint {
+    return GeoPoint(latitude, longitude, altitude)
+}
+
+fun List<GpsEntity>.toGeoPoint(): List<GeoPoint> {
+    return map { it.toGeoPoint() }
+}
 
 fun GeoPoint?.orPointZero(): GeoPoint {
     return this ?: GeoPoint(0.0, 0.0, 0.0)

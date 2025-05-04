@@ -3,6 +3,7 @@ package com.kssidll.zapierdalo.data.repository
 import com.kssidll.zapierdalo.data.dao.GpsDao
 import com.kssidll.zapierdalo.data.data.GpsEntity
 import com.kssidll.zapierdalo.domain.repository.GpsRepository
+import kotlinx.coroutines.flow.Flow
 
 class GpsRepositoryImpl(private val dao: GpsDao): GpsRepository {
 
@@ -15,5 +16,9 @@ class GpsRepositoryImpl(private val dao: GpsDao): GpsRepository {
     // Delete
 
     // Read
+
+    override fun forRunAction(runActionId: Long): Flow<List<GpsEntity>> {
+        return dao.forRunAction(runActionId)
+    }
 
 }
