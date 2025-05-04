@@ -11,6 +11,11 @@ interface StepsRepository {
      */
     suspend fun insert(entity: StepsEntity): Long
 
+    /**
+     * Inserts list of [StepsEntity] objects into the database
+     */
+    suspend fun insert(entities: List<StepsEntity>): List<Long>
+
     // Update
 
     // Delete

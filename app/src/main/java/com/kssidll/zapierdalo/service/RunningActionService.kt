@@ -536,6 +536,8 @@ class RunningActionService: Service(), SensorEventListener {
                     if (additionalSteps == 0L) return // early return if no new steps to be recorded
 
                     serviceScope.launch {
+                        val entities = mutableListOf<StepsEntity>()
+
                         activeRunActionIdList.forEach { entityId ->
                             val entity = StepsEntity(
                                 runActionId = entityId,
@@ -544,9 +546,10 @@ class RunningActionService: Service(), SensorEventListener {
 
                             Log.d(TAG, "stepsCallback: adding steps to run action $entityId")
 
-                            // TODO this should be batched since we update the shadow for every insert
-                            insertStepsEntityUseCase(entity)
+                            entities.add(entity)
                         }
+
+                        insertStepsEntityUseCase(entities)
                     }
                 }
 

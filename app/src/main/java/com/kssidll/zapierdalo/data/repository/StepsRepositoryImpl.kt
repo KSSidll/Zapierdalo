@@ -12,6 +12,10 @@ class StepsRepositoryImpl(private val dao: StepsDao): StepsRepository {
         return dao.insert(entity)
     }
 
+    override suspend fun insert(entities: List<StepsEntity>): List<Long> {
+        return dao.insert(entities)
+    }
+
     // Update
 
     // Delete

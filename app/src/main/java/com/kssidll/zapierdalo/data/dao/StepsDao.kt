@@ -34,8 +34,19 @@ interface StepsDao {
         return entityId
     }
 
+    @Transaction
+    suspend fun insert(entities: List<StepsEntity>): List<Long> {
+        val entitiesId = mInsert(entities)
+        refreshShadow()
+
+        return entitiesId
+    }
+
     @Insert
     suspend fun mInsert(entity: StepsEntity): Long
+
+    @Insert
+    suspend fun mInsert(entities: List<StepsEntity>): List<Long>
 
     // Update
 

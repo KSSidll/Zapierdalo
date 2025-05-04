@@ -16,4 +16,11 @@ class InsertStepsEntityUseCase @Inject constructor(
     ) = withContext(dispatcher) {
         stepsRepository.insert(entity)
     }
+
+    suspend operator fun invoke(
+        entities: List<StepsEntity>,
+        dispatcher: CoroutineContext = Dispatchers.IO
+    ) = withContext(dispatcher) {
+        stepsRepository.insert(entities)
+    }
 }
