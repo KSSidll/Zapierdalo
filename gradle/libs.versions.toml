@@ -7,11 +7,11 @@ kotlinx-serialization = "1.8.0"
 androidx-activity = "1.10.1"
 androidx-splashscreen-core = "1.0.1"
 androidx-appcompat = "1.7.0"
-androidx-datastore-preferences = "1.1.5"
-androidx-navigation = "2.8.9"
+androidx-datastore-preferences = "1.1.4"
+androidx-navigation = "2.9.0"
 
 # Compose
-androidx-compose-bom = "2025.04.01"
+androidx-compose-bom = "2025.05.00"
 
 # DI
 google-hilt = "2.55"
@@ -39,7 +39,7 @@ slack-compose-lint = "1.4.2"
 dev-vico-compose = "2.0.2"
 
 ## Plugins
-agp = "8.9.2"
+agp = "8.10.0"
 kotlin = "2.1.10"
 # hilt plugin has same version as hilt library so it is declared in the library section
 ksp = "2.1.10-1.0.29"
